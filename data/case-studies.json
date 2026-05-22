@@ -1,0 +1,493 @@
+{
+  "caseStudies": [
+    {
+      "id": "airbnb",
+      "client": "Airbnb",
+      "scope": "International",
+      "tier": "Large & Global",
+      "order": 1,
+      "headline": "1000+ high touch",
+      "headlineSuffix": "experiences for influencers, media, and VIPs",
+      "tags": [
+        "Global staffing",
+        "Experiential production",
+        "Executive presentations",
+        "Strategy & scaling",
+        "Operations & logistics",
+        "Talent sourcing & production",
+        "Team extension"
+      ],
+      "metrics": [
+        "Launched 4,000+ experiences on the platform in 70 cities",
+        "Scaled a team of 250 in four weeks",
+        "Produced 1,000+ high touch experiences for influencers, media, and VIPs",
+        "Generated 1B+ impressions for the Global Airbnb Experiences launch"
+      ],
+      "quote": {
+        "body": "What most (sane) producers would flag as a near-impossible task … was delivered by way of relentless determination, perpetual innovation, and staunch collaboration.",
+        "attribution": "Anna Feskes, Experiences Executive, Airbnb"
+      },
+      "video": null,
+      "poster": null,
+      "industries": [
+        "Travel",
+        "Tech",
+        "Hospitality"
+      ]
+    },
+    {
+      "id": "clinton-policy-institute",
+      "client": "Clinton Policy Institute",
+      "scope": "National",
+      "tier": "National & Impactful",
+      "order": 2,
+      "headline": "phase-two",
+      "headlineSuffix": "scaling plan launching in 2026",
+      "tags": [
+        "Influencer strategy",
+        "Executive presentations",
+        "Resourcing & execution",
+        "Social storytelling"
+      ],
+      "metrics": [
+        "Built a narrative-driven social storytelling strategy covering complex policy issues",
+        "Activated a national influencer network to drive positive sentiment",
+        "Designed and delivered donor-focused executive presentations",
+        "Presented live to Hillary Clinton",
+        "Developed the phase-two scaling plan launching in 2026"
+      ],
+      "quote": {
+        "body": "Testimonial from Nick to come.",
+        "attribution": "Nick Merrill, Evergreen Strategy Group"
+      },
+      "video": null,
+      "poster": null,
+      "industries": [
+        "Government & Social Impact",
+        "Media"
+      ]
+    },
+    {
+      "id": "presidente",
+      "client": "Presidente",
+      "scope": "Monterrey, Mexico",
+      "tier": "Regional & Resourceful",
+      "order": 3,
+      "headline": "talked about",
+      "headlineSuffix": "hotel opening in the city's history",
+      "tags": [
+        "Product & venue launch",
+        "Executive logistics",
+        "Premium hospitality",
+        "Resourcing & production",
+        "Headline-generating experiences",
+        "Press Trip Orchestration"
+      ],
+      "metrics": [
+        "Produced the most talked-about hotel opening in the city's history",
+        "Earned 5.5 million digital impressions across platforms",
+        "Engaged local A-listers and national media",
+        "Hosted 500+ guests at a pajama-themed celebration",
+        "Designed 20+ experiential moments throughout the property"
+      ],
+      "quote": null,
+      "video": null,
+      "poster": null,
+      "industries": [
+        "Hospitality",
+        "Hotels"
+      ]
+    },
+    {
+      "id": "daydream-ai",
+      "client": "Daydream AI",
+      "scope": "New York City",
+      "tier": "Dedicated & Digital",
+      "order": 4,
+      "headline": "first-to-market",
+      "headlineSuffix": "launch for 500+ guests",
+      "tags": [
+        "Brand launch",
+        "Venue logistics",
+        "Premium hospitality",
+        "End-to-end execution",
+        "Digital & invite strategy",
+        "Metric-driven recap"
+      ],
+      "metrics": [
+        "Delivered a first-to-market launch for 500+ guests",
+        "Sourced and negotiated a flagship SoHo venue",
+        "Built AI-to-IRL visual systems and brand identity",
+        "Activated 30 strategic partners on launch day",
+        "Executed a street-level buzz strategy generating thousands of organic views"
+      ],
+      "quote": null,
+      "video": null,
+      "poster": null,
+      "industries": [
+        "Tech",
+        "AI",
+        "Product Launch"
+      ]
+    },
+    {
+      "id": "duckduckgo",
+      "client": "DuckDuckGo",
+      "scope": "National",
+      "tier": "Influential & Impactful",
+      "order": 5,
+      "headline": "coming soon",
+      "headlineSuffix": "case study in development",
+      "tags": [],
+      "metrics": [],
+      "quote": null,
+      "video": null,
+      "poster": null,
+      "draft": true,
+      "industries": [
+        "Tech"
+      ]
+    },
+    {
+      "id": "apple",
+      "client": "Apple",
+      "scope": "New York City",
+      "tier": "Longform & Gamechanging",
+      "order": 6,
+      "headline": "decade-long",
+      "headlineSuffix": "experiential platform",
+      "tags": [
+        "Venue sourcing",
+        "Platform creation",
+        "Always-on activation",
+        "Longform experiential",
+        "High-touch talent",
+        "Executive presentations",
+        "Global rollout",
+        "On-site marketing"
+      ],
+      "metrics": [
+        "Sourced, designed, and built Apple's decade-long experiential platform",
+        "Produced 3,500+ live activations for high-touch audiences",
+        "Designed 40,000 sq ft of modular space that became Apple's global production standard",
+        "Wrote the playbook for Apple's media, influencer, and celebrity engagement",
+        "Developed a prototype rolled out across seven global markets",
+        "Operated as an always-on space 275+ days per year from 2016 onward"
+      ],
+      "quote": null,
+      "video": null,
+      "poster": null,
+      "industries": [
+        "Tech",
+        "Product Launch"
+      ]
+    },
+    {
+      "id": "locally-yours",
+      "client": "Locally Yours",
+      "scope": "Global",
+      "tier": "Original & Scalable",
+      "order": 7,
+      "headline": "market-first",
+      "headlineSuffix": "platform connecting business teams through real-world experiences",
+      "tags": [
+        "Platform creation",
+        "Talent sourcing",
+        "Experience curation",
+        "Culture building",
+        "End-to-end delivery",
+        "Brand-led engagement",
+        "Identity conception & rollout"
+      ],
+      "metrics": [
+        "Created a market-first platform enabling business teams to connect through curated, real-world experiences",
+        "Devised and launched a scalable brand — spanning platform strategy, visual identity, website, social presence, and editorial content",
+        "Activated in-demand local experts to deliver high-impact experiences in cities including New York City, Athens, Rio de Janeiro, and Toronto",
+        "Reframed team offsites as culture-building moments, not calendar obligations"
+      ],
+      "quote": null,
+      "video": null,
+      "poster": null,
+      "industries": [
+        "Tech",
+        "Travel"
+      ]
+    },
+    {
+      "id": "cartier",
+      "client": "Cartier",
+      "scope": "Mexico",
+      "tier": "New & In Progress",
+      "order": 8,
+      "headline": "",
+      "headlineSuffix": "",
+      "tags": [],
+      "metrics": [],
+      "quote": null,
+      "video": null,
+      "poster": null,
+      "draft": true,
+      "industries": [
+        "Fashion & Luxury",
+        "Beauty"
+      ]
+    }
+  ],
+  "intro": {
+    "headline": "Every great story starts with an experience.",
+    "lede": "We are a global team of creative innovators building game-changing partnerships with the world's most influential brands.",
+    "tagline": "We don't do projects. We build platforms.",
+    "aboutVideo": null,
+    "aboutPoster": null,
+    "heroVideo": "/media/cover-titlecard-mp4cxs9j.mp4",
+    "heroPoster": null,
+    "credsVideo": null,
+    "credsPoster": null,
+    "foundersVideo": "/media/jess-and-brown-no-text-mp4cp93v.mp4",
+    "foundersPoster": null,
+    "showreelVideo": null,
+    "showreelPoster": null,
+    "servicesVideo": null,
+    "servicesPoster": null,
+    "ctaVideo": null,
+    "ctaPoster": null,
+    "heroHeadline": "Every great story starts with an experience.",
+    "heroLede": "We are a global team of creative innovators building game-changing partnerships with the world's most influential brands. We don't do projects. We build platforms.",
+    "credsTitle": "Top level creds",
+    "manifestoLine1": "We don't do projects.",
+    "manifestoLine2": "We build platforms.",
+    "foundersTitle": "OUR FOUNDERS",
+    "servicesTitle": "SERVICES",
+    "alwaysIncludedTitle": "ALWAYS INCLUDED",
+    "customServicesTitle": "CUSTOM SERVICES",
+    "ctaLine1": "Bring us your hardest project",
+    "ctaLine2": "make it win"
+  },
+  "topCreds": [
+    "Scaled Airbnb Experiences in 70 cities from Los Angeles to London, Sydney, Seoul and Sao Paulo",
+    "Onboarded a team of 250 creative connectors in just four weeks across five continents",
+    "Hand-produced 1,000+ high-touch experiences in 20 major markets from Europe to Asia in nine months",
+    "Built Apple's experiential and buzz strategy, from creating a secret home in Tribeca to designing the original marketing plan for the iPhone",
+    "Collaborated with brands including Cartier, Louis Vuitton, GQ, Warner Bros, Netflix, Amazon, Google, Meta, Instagram, P&G, and Havaianas",
+    "Serve as the in-house experiential team for the James Beard Foundation and the controlling partner for its iconic West Village house",
+    "Modelled social strategy for the Clinton Policy Institute"
+  ],
+  "founders": [
+    {
+      "name": "Brown Bartholomew",
+      "title": "CEO & CO-FOUNDER",
+      "bio": "Brown Bartholomew is the CEO and co-founder of CAPE, where he brings global talent together across entertainment, music, sports, technology, and social media to create culture-defining work. A creative strategist and relationship builder, Brown spent 16 years at Apple leading the Global Buzz Marketing team, launching the original iPhone, and established Apple's first social media and culture strategy. With a rare instinct for culture and technology, he helps brands stay ahead of what's coming next.",
+      "tagline": "Brown builds what others follow."
+    },
+    {
+      "name": "Jessica Resler",
+      "title": "CO-FOUNDER",
+      "bio": "Jessica Resler is the co-founder of CAPE, with an otherworldly track record of bringing brilliant ideas to life. She is a creative and experiential pioneer who has scaled projects for industry icons like Apple, Airbnb, Mondelez, Dell, and many more. She is a leader in long-form experiential and has partnered with the world's top brands and talent to deliver ambitious platform projects at scale. Her expertise spans immersive design, storytelling, and emerging technology with a focus on originality and results.",
+      "tagline": "Jessica makes big things happen."
+    }
+  ],
+  "savedSections": [
+    {
+      "id": "for-jess",
+      "name": "For Jess",
+      "description": null,
+      "caseStudyIds": [
+        "daydream-ai",
+        "presidente",
+        "clinton-policy-institute",
+        "airbnb"
+      ],
+      "clientIds": [
+        "amazon",
+        "google",
+        "clinton-policy",
+        "james-beard"
+      ],
+      "createdAt": 1778430655972,
+      "updatedAt": 1778430655972,
+      "createdBy": "jessica@capecreative.co"
+    },
+    {
+      "id": "jess-test",
+      "name": "Jess Test",
+      "description": null,
+      "caseStudyIds": [
+        "airbnb",
+        "clinton-policy-institute",
+        "presidente"
+      ],
+      "clientIds": [
+        "netflix",
+        "amazon",
+        "google",
+        "airbnb"
+      ],
+      "createdAt": 1778429205987,
+      "updatedAt": 1778429205987,
+      "createdBy": "jessica@capecreative.co"
+    }
+  ],
+  "clients": [
+    {
+      "id": "apple",
+      "name": "Apple",
+      "logo": "/media/logos-apple-mp4brs3h.png",
+      "order": 1
+    },
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "logo": "/media/logos-airbnb-mp4brrvd.png",
+      "order": 2
+    },
+    {
+      "id": "cartier",
+      "name": "Cartier",
+      "logo": null,
+      "order": 3
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "logo": "/media/logos-netflix-mp4brso3.png",
+      "order": 7
+    },
+    {
+      "id": "amazon",
+      "name": "Amazon",
+      "logo": "/media/logos-amazon-mp4brrzl.png",
+      "order": 8
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "logo": "/media/logos-google-mp4brsbb.png",
+      "order": 9
+    },
+    {
+      "id": "meta",
+      "name": "Meta",
+      "logo": "/media/logos-meta-mp4brsfe.png",
+      "order": 10
+    },
+    {
+      "id": "clinton-policy",
+      "name": "Clinton Policy Institute",
+      "logo": null,
+      "order": 15
+    },
+    {
+      "id": "mondelez",
+      "name": "Mondelez",
+      "logo": "/media/logos-mondelez-mp4brsjw.png",
+      "order": 16
+    },
+    {
+      "id": "daydream-ai",
+      "name": "Daydream AI",
+      "logo": null,
+      "order": 18
+    },
+    {
+      "id": "duckduckgo",
+      "name": "DuckDuckGo",
+      "logo": null,
+      "order": 19
+    },
+    {
+      "id": "presidente",
+      "name": "Presidente",
+      "logo": null,
+      "order": 20
+    },
+    {
+      "id": "locally-yours",
+      "name": "Locally Yours",
+      "logo": null,
+      "order": 21
+    },
+    {
+      "id": "audible",
+      "name": "Audible",
+      "logo": "/media/logos-audible-mp4brs7o.png",
+      "order": 22
+    },
+    {
+      "id": "rivian",
+      "name": "Rivian",
+      "logo": "/media/logos-rivian-mp4brssd.png",
+      "order": 23
+    },
+    {
+      "id": "sequoia",
+      "name": "Sequoia",
+      "logo": "/media/logos-sequoia-mp4brswo.png",
+      "order": 24
+    },
+    {
+      "id": "shure",
+      "name": "Shure",
+      "logo": "/media/logos-shure-mp4brt1a.png",
+      "order": 25
+    },
+    {
+      "id": "sour-patch-kids",
+      "name": "Sour Patch Kids",
+      "logo": "/media/logos-sourpatch-mp4brt70.png",
+      "order": 26
+    },
+    {
+      "id": "tinder",
+      "name": "Tinder",
+      "logo": "/media/logos-tinder-mp4brtaz.png",
+      "order": 27
+    },
+    {
+      "id": "unilever",
+      "name": "Unilever",
+      "logo": "/media/logos-unilever-mp4brtf0.png",
+      "order": 28
+    },
+    {
+      "id": "vox",
+      "name": "Vox",
+      "logo": "/media/logos-vox-mp4brtjb.png",
+      "order": 29
+    },
+    {
+      "id": "the-white-house",
+      "name": "The White House",
+      "logo": "/media/logos-whitehouse-mp4brtnc.png",
+      "order": 30
+    },
+    {
+      "id": "birkenstock",
+      "name": "Birkenstock",
+      "logo": null,
+      "order": 31
+    },
+    {
+      "id": "pop-mart",
+      "name": "Pop Mart",
+      "logo": null,
+      "order": 32
+    }
+  ],
+  "alwaysIncluded": [
+    "Pre/during/post experience strategy",
+    "Platform execution",
+    "Custom web-deck integration",
+    "Digital playbooks",
+    "Premium experiential staffing",
+    "Metrics-driven reporting and recaps"
+  ],
+  "customServices": [
+    "Content capture & distribution",
+    "3D and 2D graphic systems",
+    "Digital, social, and physical product (swag, merch, activations)",
+    "Talent sourcing and management",
+    "Original IP and joint ventures",
+    "Globally synchronized delivery",
+    "Comprehensive PR & Influencer strategy"
+  ]
+}

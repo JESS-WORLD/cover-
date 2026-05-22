@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover — CAPE Case Studies</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="cv-header">
+    <div class="cv-header-left">
+      <a class="cv-logo" href="/">COVER</a>
+      <nav class="cv-nav">
+        <a href="/" class="cv-nav-link active">Case studies</a>
+        <a href="/logos" class="cv-nav-link">Logos</a>
+        <a href="/sections" class="cv-nav-link">Sections</a>
+        <a href="/about" class="cv-nav-link">About</a>
+      </nav>
+    </div>
+    <div class="cv-header-right">
+      <button class="cv-btn" id="newCaseStudyBtn">+ New case study</button>
+      <button class="cv-btn" id="selectModeBtn">Selection mode</button>
+      <a class="cv-btn cv-btn-primary" href="https://www.capecreative.co" target="_blank" rel="noopener">capecreative.co</a>
+    </div>
+  </header>
+
+  <!-- Context action bar — appears under the header when ⋯ is hit on a card -->
+  <div class="cv-card-action-bar" id="cardActionBar" aria-hidden="true">
+    <div class="cv-cab-thumb" id="cabThumb"></div>
+    <div class="cv-cab-text">
+      <div class="cv-cab-eyebrow" id="cabEyebrow">Case study</div>
+      <div class="cv-cab-name" id="cabName">—</div>
+    </div>
+    <div class="cv-cab-actions" id="cabActions"></div>
+    <button class="cv-cab-close" id="cabClose" aria-label="Close action bar">&times;</button>
+  </div>
+
+  <div class="cv-content">
+    <section class="cv-hero">
+      <h1>Every great story starts with an <em>experience</em>.</h1>
+      <p>A live database of CAPE's platform work — pull the right case studies into any pitch in seconds.</p>
+    </section>
+
+    <div class="cv-selection-bar" id="selectionBar">
+      <div class="cv-sel-tally">
+        <span><strong id="selCount">0</strong> case stud<span id="selCountSuffix">ies</span></span>
+        <span id="logoTally" style="display:none">· <strong id="logoCount">0</strong> logos</span>
+      </div>
+      <div class="cv-sel-actions">
+        <label class="cv-sel-toggle" id="includeAboutLabel" title="Prepend the About intro (manifesto + creds + founders) to this deck">
+          <input type="checkbox" id="includeAboutToggle" />
+          <span>Include About intro</span>
+        </label>
+        <button class="secondary" id="clearSelBtn">Clear</button>
+        <button class="secondary" id="attachLogosBtn">Attach logos</button>
+        <button class="cv-sel-save" id="saveSectionBtn">Save as section</button>
+        <button id="exportSelBtn">Export selection</button>
+      </div>
+    </div>
+
+    <!-- Logo picker modal -->
+    <div class="cv-modal-backdrop" id="logoModal" aria-hidden="true">
+      <div class="cv-modal" role="dialog" aria-labelledby="logoModalTitle">
+        <header class="cv-modal-head">
+          <div>
+            <div class="cv-modal-title" id="logoModalTitle">Attach a logo sheet</div>
+            <div class="cv-modal-sub">Pick the brands to include on the "Trusted by" page in this export.</div>
+          </div>
+          <button class="cv-modal-close" id="logoModalClose" aria-label="Close">&times;</button>
+        </header>
+        <div class="cv-modal-body">
+          <div class="cv-toolbar" style="padding:0; margin-bottom:0.85rem;">
+            <div class="cv-filters">
+              <button class="cv-filter" id="lpAllBtn">Select all</button>
+              <button class="cv-filter" id="lpWithLogosBtn">Select all with logos</button>
+              <button class="cv-filter" id="lpNoneBtn">Clear</button>
+            </div>
+            <div class="cv-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="cv-search" id="lpSearch" placeholder="Filter clients…" autocomplete="off" />
+            </div>
+          </div>
+          <div class="cv-logos-grid" id="lpGrid"></div>
+        </div>
+        <footer class="cv-modal-foot">
+          <div class="left"><span id="lpCountText">0 selected</span></div>
+          <div class="right">
+            <button class="cv-btn" id="lpCancelBtn">Cancel</button>
+            <button class="cv-btn cv-btn-primary" id="lpSaveBtn">Attach</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <div class="cv-toolbar">
+      <div class="cv-filters" id="tierFilters" aria-label="Filter by industry">
+        <button class="cv-filter active" data-industry="all">All</button>
+      </div>
+      <div class="cv-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="cv-search" id="searchInput" placeholder="Search case studies, capabilities…" autocomplete="off" />
+      </div>
+    </div>
+
+    <main>
+      <div class="cv-grid" id="grid"></div>
+      <div class="cv-empty" id="emptyState" style="display:none">No case studies match your filters.</div>
+    </main>
+  </div>
+
+  <script src="/auth.js"></script>
+  <script src="/dashboard.js"></script>
+</body>
+</html>

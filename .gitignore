@@ -1,0 +1,10 @@
+node_modules
+.DS_Store
+.env
+.env.*
+*.log
+data-seed
+
+# Uploaded media (videos, logos) — large binaries, already backed up to R2
+data/media
+public/media

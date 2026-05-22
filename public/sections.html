@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover — Saved Sections</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="cv-header">
+    <div class="cv-header-left">
+      <a class="cv-logo" href="/">COVER</a>
+      <nav class="cv-nav">
+        <a href="/" class="cv-nav-link">Case studies</a>
+        <a href="/logos" class="cv-nav-link">Logos</a>
+        <a href="/sections" class="cv-nav-link active">Sections</a>
+        <a href="/about" class="cv-nav-link">About</a>
+      </nav>
+    </div>
+    <div class="cv-header-right">
+      <a class="cv-btn cv-btn-primary" href="https://www.capecreative.co" target="_blank" rel="noopener">capecreative.co</a>
+    </div>
+  </header>
+
+  <div class="cv-content">
+    <section class="cv-hero">
+      <h1>Saved <em>sections</em>.</h1>
+      <p>Reusable bundles of case studies + a curated logo sheet. Pre-assemble once, drop straight into any pitch.</p>
+    </section>
+
+    <main>
+      <div class="cv-sections-grid" id="grid"></div>
+      <div class="cv-empty" id="emptyState" style="display:none">No saved sections yet — open the dashboard, pick case studies + logos, then hit "Save as section".</div>
+    </main>
+  </div>
+
+  <script src="/auth.js"></script>
+  <script src="/sections.js"></script>
+</body>
+</html>

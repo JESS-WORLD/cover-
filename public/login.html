@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover — Sign in</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="cv-login-body">
+  <main class="cv-login-wrap">
+    <div class="cv-login-card">
+      <div class="cv-logo cv-login-logo">COVER</div>
+      <h1 class="cv-login-title">Every great story starts with an <em>experience</em>.</h1>
+      <p class="cv-login-sub">Sign in with your CAPE email to access the case studies database.</p>
+
+      <form id="loginForm" class="cv-login-form" autocomplete="on">
+        <input type="text" id="loginName" class="cv-login-input" placeholder="Your name" autocomplete="name" required />
+        <input type="email" id="loginEmail" class="cv-login-input" placeholder="you@capecreative.co" autocomplete="email" required />
+        <button type="submit" class="cv-btn cv-btn-primary cv-login-btn">Sign in</button>
+        <div id="loginError" class="cv-login-error" role="alert"></div>
+      </form>
+
+      <p class="cv-login-foot">Internal tool. Restricted to capecreative.co accounts.</p>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const form = document.getElementById('loginForm');
+      const errEl = document.getElementById('loginError');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errEl.textContent = '';
+        const name = document.getElementById('loginName').value.trim();
+        const email = document.getElementById('loginEmail').value.trim();
+        if (!name || !email) {
+          errEl.textContent = 'Please enter your name and email.';
+          return;
+        }
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            if (data.error === 'restricted_domain') {
+              errEl.textContent = `Access restricted to @${data.domain} accounts.`;
+            } else {
+              errEl.textContent = 'Could not sign in. Please try again.';
+            }
+            return;
+          }
+          try { localStorage.setItem('cover_token', data.token); } catch {}
+          window.location.href = '/';
+        } catch {
+          errEl.textContent = 'Network error. Please try again.';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

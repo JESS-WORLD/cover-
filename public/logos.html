@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover — Client Logos</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="cv-header">
+    <div class="cv-header-left">
+      <a class="cv-logo" href="/">COVER</a>
+      <nav class="cv-nav">
+        <a href="/" class="cv-nav-link">Case studies</a>
+        <a href="/logos" class="cv-nav-link active">Logos</a>
+        <a href="/sections" class="cv-nav-link">Sections</a>
+        <a href="/about" class="cv-nav-link">About</a>
+      </nav>
+    </div>
+    <div class="cv-header-right">
+      <a class="cv-btn cv-btn-primary" href="https://www.capecreative.co" target="_blank" rel="noopener">capecreative.co</a>
+    </div>
+  </header>
+
+  <!-- Context action bar -->
+  <div class="cv-card-action-bar" id="cardActionBar" aria-hidden="true">
+    <div class="cv-cab-thumb" id="cabThumb"></div>
+    <div class="cv-cab-text">
+      <div class="cv-cab-eyebrow" id="cabEyebrow">Client logo</div>
+      <div class="cv-cab-name" id="cabName">—</div>
+    </div>
+    <div class="cv-cab-actions" id="cabActions"></div>
+    <button class="cv-cab-close" id="cabClose" aria-label="Close action bar">&times;</button>
+  </div>
+
+  <div class="cv-content">
+    <section class="cv-hero">
+      <h1>Client logo <em>library</em>.</h1>
+      <p>Upload, organize, and pull a "Trusted by" page in one click — drop straight into any pitch deck.</p>
+    </section>
+
+    <div class="cv-selection-bar" id="selectionBar">
+      <div><span id="selCount">0</span> selected</div>
+      <div class="cv-sel-actions">
+        <button class="secondary" id="clearSelBtn">Clear</button>
+        <button id="exportSelBtn">Build logo page</button>
+      </div>
+    </div>
+
+    <div class="cv-toolbar">
+      <div class="cv-filters">
+        <button class="cv-filter active" id="selectAllBtn">Select all</button>
+        <button class="cv-filter" id="selectWithLogosBtn">Select all with logos</button>
+      </div>
+      <div class="cv-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="cv-search" id="searchInput" placeholder="Search clients…" autocomplete="off" />
+      </div>
+    </div>
+
+    <main>
+      <div class="cv-logos-grid" id="grid"></div>
+      <div class="cv-empty" id="emptyState" style="display:none">No clients match your search.</div>
+    </main>
+
+    <input type="file" id="logoFile" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden />
+  </div>
+
+  <script src="/auth.js"></script>
+  <script src="/logos.js"></script>
+</body>
+</html>

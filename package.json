@@ -1,0 +1,16 @@
+{
+  "name": "cover",
+  "version": "0.1.0",
+  "description": "Case studies app for CAPE Creative",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1052.0",
+    "express": "^4.21.2",
+    "multer": "^2.1.1"
+  }
+}

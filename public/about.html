@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover — About CAPE</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="cv-header">
+    <div class="cv-header-left">
+      <a class="cv-logo" href="/">COVER</a>
+      <nav class="cv-nav">
+        <a href="/" class="cv-nav-link">Case studies</a>
+        <a href="/logos" class="cv-nav-link">Logos</a>
+        <a href="/sections" class="cv-nav-link">Sections</a>
+        <a href="/about" class="cv-nav-link active">About</a>
+      </nav>
+    </div>
+    <div class="cv-header-right">
+      <button class="cv-btn" id="aboutEditToggleBtn" type="button">Edit page</button>
+      <a class="cv-btn cv-btn-primary" href="https://www.capecreative.co" target="_blank" rel="noopener">capecreative.co</a>
+    </div>
+  </header>
+
+  <!-- Sticky Save bar for edit mode -->
+  <div class="cv-edit-bar cv-about-edit-bar" id="aboutEditBar" style="display:none">
+    <span class="cv-edit-status" id="aboutEditStatus">All changes saved</span>
+    <button class="secondary" id="aboutEditCancelBtn" type="button">Done</button>
+    <button id="aboutEditSaveBtn" type="button" disabled>Save</button>
+  </div>
+
+  <!-- SHOWREEL — video only, no text overlay -->
+  <section class="cv-bg-section cv-bg-section--bare" data-section="showreel" data-has-media="false" style="min-height: clamp(360px, 56vh, 600px);">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-empty">
+      <button data-upload class="cv-bg-section-empty-btn" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Upload showreel</span>
+        <span class="cv-bg-section-empty-hint">No text overlay — full-bleed video only</span>
+      </button>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload type="button">Replace reel</button>
+      <button data-remove style="display:none" type="button">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- HERO -->
+  <section class="cv-bg-section" data-section="hero" data-has-media="false">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-content">
+      <div class="cv-about-hero" id="aboutHero" style="padding: 0;"></div>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload>Upload reel</button>
+      <button data-remove style="display:none">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- TOP LEVEL CREDS -->
+  <section class="cv-bg-section" data-section="creds" data-has-media="false">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-content">
+      <div>
+        <h2 class="cv-section-label" style="margin-bottom: 1.2rem; font-size: 0.78rem;">Top level creds</h2>
+        <ul class="cv-creds-list" id="credsList" style="grid-template-columns: 1fr 1fr; column-gap: 3rem;"></ul>
+      </div>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload>Upload reel</button>
+      <button data-remove style="display:none">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- "WE DON'T DO PROJECTS / WE BUILD PLATFORMS" REEL -->
+  <section class="cv-bg-section" data-section="about" data-has-media="false">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-content center">
+      <h2 class="cv-reel-headline">We don't do projects.<br/><em>We build platforms.</em></h2>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload>Upload reel</button>
+      <button data-remove style="display:none">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- OUR FOUNDERS -->
+  <section class="cv-bg-section" data-section="founders" data-has-media="false">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-content">
+      <h2 class="cv-section-label" style="margin-bottom: 1.2rem; font-size: 0.78rem;">Our founders</h2>
+      <div class="cv-founders" id="foundersGrid"></div>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload>Upload reel</button>
+      <button data-remove style="display:none">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="cv-bg-section" data-section="services" data-has-media="false">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-content">
+      <h2 class="cv-section-label" style="margin-bottom: 1.2rem; font-size: 0.78rem;">Services</h2>
+      <div class="cv-services-grid">
+        <div class="cv-service-block">
+          <div class="cv-section-label">Always included</div>
+          <div class="cv-service-tags" id="alwaysIncluded"></div>
+        </div>
+        <div class="cv-service-block">
+          <div class="cv-section-label">Custom services</div>
+          <div class="cv-service-tags" id="customServices"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload>Upload reel</button>
+      <button data-remove style="display:none">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cv-bg-section" data-section="cta" data-has-media="false" style="min-height: 56vh;">
+    <div class="cv-bg-section-media" data-media></div>
+    <div class="cv-bg-section-content center">
+      <h2 class="cv-reel-headline">Bring us your hardest project<br/>and we'll <em>make it win</em>.</h2>
+    </div>
+    <div class="cv-bg-section-controls" data-controls>
+      <button data-upload>Upload reel</button>
+      <button data-remove style="display:none">Remove reel</button>
+    </div>
+  </section>
+
+  <!-- One shared file input for all section uploads -->
+  <input type="file" id="sectionFile" accept="video/*,image/*" hidden />
+
+  <script src="/auth.js"></script>
+  <script src="/about.js"></script>
+</body>
+</html>

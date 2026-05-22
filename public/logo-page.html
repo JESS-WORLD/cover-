@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover — Logo Page</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="lp-toolbar">
+    <a class="cv-logo" href="/logos">COVER</a>
+    <div class="lp-title" id="lpTitle">Trusted by</div>
+    <div class="cv-export-actions">
+      <button class="cv-btn" id="copyLinkBtn">Copy share link</button>
+      <button class="cv-btn cv-btn-primary" id="printBtn">Print / Save as PDF</button>
+    </div>
+  </div>
+  <main class="lp-page" id="lpPage">
+    <header class="lp-page-header">
+      <div class="lp-page-eyebrow">Trusted by</div>
+      <h1 class="lp-page-title">Brands we've <em>built platforms with</em>.</h1>
+    </header>
+    <div class="lp-grid" id="lpGrid"></div>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/logo-page.js"></script>
+</body>
+</html>
