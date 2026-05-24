@@ -1276,6 +1276,20 @@ body.cv-edit-mode .cv-phone-frame.cv-phone-has-video { cursor: pointer; }
 }
 .cv-edit-status.is-nudged { animation: cv-edit-status-nudge 360ms ease; }
 
+/* "Just saved" state — bumps the status text to a confident green +
+   pops it for a moment, so an auto-save after a media upload is
+   unambiguous instead of silent. */
+.cv-edit-status.is-just-saved {
+  color: #6ee7a7;
+  font-weight: 700;
+  animation: cv-edit-status-just-saved 600ms ease;
+}
+@keyframes cv-edit-status-just-saved {
+  0%   { transform: translateY(4px); opacity: 0; }
+  60%  { transform: translateY(-2px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 .cv-editable {
   outline: 1px dashed transparent;
   border-radius: 4px;

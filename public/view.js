@@ -673,8 +673,21 @@
       render();
       setEditableMode(editMode);
       setDirty(false);
+      // Make the auto-save VISIBLE — otherwise users think Save is broken
+      // when they later click it and nothing happens (because we already
+      // saved everything for them on the upload).
       status = document.getElementById('editStatus');
-      if (status) status.textContent = `${type === 'video' ? 'Video' : 'Image'} added`;
+      if (status) {
+        status.textContent = `✓ ${type === 'video' ? 'Video' : 'Image'} added and saved automatically`;
+        status.classList.add('is-just-saved');
+        setTimeout(() => {
+          const s = document.getElementById('editStatus');
+          if (s) {
+            s.classList.remove('is-just-saved');
+            s.textContent = 'All changes saved';
+          }
+        }, 3500);
+      }
     } catch (err) {
       console.error(err);
       alert(`Could not add the ${type}. The file may have uploaded but the case study didn't pick it up.`);
