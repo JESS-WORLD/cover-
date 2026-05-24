@@ -1479,7 +1479,11 @@ body.cv-edit-mode .cv-marquee { display: none; }
 
 .cv-marquee-item {
   flex: 0 0 auto;
+  /* Explicit width derived from height × 16:9 so layout is stable even before
+     the media reports intrinsic dimensions (loading=lazy delays that). */
+  width: 356px;
   height: 200px;
+  aspect-ratio: 16/9;
   border-radius: 10px;
   overflow: hidden;
   background: #0d0d0d;
@@ -1487,8 +1491,8 @@ body.cv-edit-mode .cv-marquee { display: none; }
 }
 .cv-marquee-item img,
 .cv-marquee-item video {
+  width: 100%;
   height: 100%;
-  width: auto;
   display: block;
   object-fit: cover;
   /* Disable pointer events so even an accidental click is silent */
@@ -1672,7 +1676,9 @@ body:not(.cv-edit-mode) .cv-scale-section:not(:has(.cv-scale-field:not(:has(.cv-
   color: var(--cream);
 }
 
-/* Secondary-media gallery slide (one per case study, only when 2+ media). */
+/* Secondary-media gallery slide (one per case study, only when 2+ media).
+   On screen: items auto-scroll horizontally (matches view.js marquee).
+   On print: animation paused + items wrap into rows so every photo prints. */
 .cv-export-gallery {
   padding: 3rem;
 }
@@ -1690,45 +1696,76 @@ body:not(.cv-edit-mode) .cv-scale-section:not(:has(.cv-scale-field:not(:has(.cv-
   color: var(--cream-soft);
   font-size: 0.65em;
 }
-.cv-export-grid {
-  display: grid;
+
+.cv-export-marquee {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+.cv-export-marquee-track {
+  display: flex;
   gap: 1rem;
+  width: max-content;
+  align-items: flex-start;
+  animation: cv-marquee-scroll 60s linear infinite;
+  will-change: transform;
 }
-.cv-export-grid[data-count="1"] { grid-template-columns: 1fr; }
-.cv-export-grid[data-count="2"] { grid-template-columns: 1fr 1fr; }
-.cv-export-grid[data-count="3"],
-.cv-export-grid[data-count="4"] { grid-template-columns: 1fr 1fr; }
-.cv-export-grid[data-count="5"],
-.cv-export-grid[data-count="6"] { grid-template-columns: 1fr 1fr 1fr; }
-.cv-export-gtile {
+.cv-export-marquee:hover .cv-export-marquee-track { animation-play-state: paused; }
+
+.cv-export-marquee-item {
+  flex: 0 0 auto;
   margin: 0;
-  display: flex; flex-direction: column; gap: 0.45rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  width: 498px; /* 280px tall × 16:9 — explicit so layout is stable before media loads */
 }
-.cv-export-gtile-frame {
+.cv-export-marquee-frame {
+  width: 100%;
+  height: 280px;
   aspect-ratio: 16/9;
   background: #0d0d0d;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--border);
 }
-.cv-export-gtile-frame video,
-.cv-export-gtile-frame img {
+.cv-export-marquee-frame video,
+.cv-export-marquee-frame img {
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+  user-select: none;
 }
-.cv-export-gtile figcaption {
+.cv-export-marquee-item figcaption {
   font-size: 0.78rem;
   color: var(--cream-soft);
   font-weight: 500;
   text-align: center;
 }
-.cv-export-gallery-more {
-  margin-top: 1.2rem;
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  font-style: italic;
-  text-align: center;
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-export-marquee-track { animation: none; }
+}
+
+@media print {
+  /* For print, freeze the marquee and re-flow items as a wrapping grid so
+     every photo lands on paper instead of just the snapshot frame. */
+  .cv-export-marquee {
+    overflow: visible;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  .cv-export-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .cv-export-marquee-item { max-width: 32%; }
+  .cv-export-marquee-frame { height: auto; aspect-ratio: 16/9; }
+  .cv-export-marquee-frame img,
+  .cv-export-marquee-frame video {
+    width: 100%; height: 100%;
+  }
 }
 
 /* About-page slides embedded in the export deck: full-bleed,

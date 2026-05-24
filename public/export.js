@@ -282,31 +282,35 @@
     `;
   }
 
-  // Secondary media slide — only emitted when a case study has 2+ media items.
-  // Shows up to 6 secondary items in a grid (keeps decks tight even if a study
-  // has 12 photos uploaded; the rest stay viewable in Cover but not in print).
+  // Secondary media slide — emitted when a case study has 2+ media items.
+  // On screen the items auto-scroll horizontally (matches the read-mode marquee
+  // in view.js so the export feels like a continuation of Cover, not a flat doc).
+  // For print, CSS pauses the animation and wraps the items so the page still
+  // captures every photo. Shows ALL secondary media (no cap) — scroll makes
+  // count irrelevant on screen, and print wrapping handles long lists too.
   function gallerySlideHTML(cs) {
     const media = Array.isArray(cs.media) ? cs.media : [];
     if (media.length <= 1) return '';
-    const extras = media.slice(1, 7); // up to 6 secondary items
-    const tiles = extras.map((m) => {
+    const extras = media.slice(1);
+    const tileHTML = (m) => {
       const inner = m.type === 'video'
         ? `<video src="${escapeHtml(m.url)}" muted playsinline preload="metadata"${m.poster ? ` poster="${escapeHtml(m.poster)}"` : ''}></video>`
-        : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.caption || '')}" />`;
+        : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.caption || '')}" loading="lazy" />`;
       return `
-        <figure class="cv-export-gtile">
-          <div class="cv-export-gtile-frame">${inner}</div>
+        <figure class="cv-export-marquee-item" aria-hidden="true">
+          <div class="cv-export-marquee-frame">${inner}</div>
           ${m.caption ? `<figcaption>${escapeHtml(m.caption)}</figcaption>` : ''}
         </figure>
       `;
-    }).join('');
-    const moreCount = media.length - 1 - extras.length;
+    };
+    const oneSet = extras.map(tileHTML).join('');
     return `
       <section class="cv-export-slide cv-export-gallery">
         <div class="cv-detail-tier">${escapeHtml(cs.tier || '')} · More from ${escapeHtml(cs.client || '')}</div>
         <h2 class="cv-export-gallery-title">${escapeHtml(cs.client || '')}<span class="pipe">|</span><span class="cv-export-gallery-sub">selected media</span></h2>
-        <div class="cv-export-grid" data-count="${extras.length}">${tiles}</div>
-        ${moreCount > 0 ? `<div class="cv-export-gallery-more">+ ${moreCount} more in Cover</div>` : ''}
+        <div class="cv-export-marquee">
+          <div class="cv-export-marquee-track">${oneSet}${oneSet}${oneSet}</div>
+        </div>
       </section>
     `;
   }
