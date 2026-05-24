@@ -48,11 +48,93 @@
       </span>
     `).join('');
 
-    const phoneInner = cs.video
-      ? `<video src="${escapeHtml(cs.video)}" autoplay muted loop playsinline ${cs.poster ? `poster="${escapeHtml(cs.poster)}"` : ''}></video>`
-      : cs.poster
-      ? `<img src="${escapeHtml(cs.poster)}" alt="${escapeHtml(cs.client || '')}" />`
-      : `<div class="cv-phone-empty" id="phoneEmpty">Drop progress reel here</div>`;
+    // Hero = first item in cs.media[] (server has projected legacy video/poster into media on read).
+    const media = Array.isArray(cs.media) ? cs.media : [];
+    const hero = media[0];
+    const phoneInner = hero
+      ? (hero.type === 'video'
+          ? `<video src="${escapeHtml(hero.url)}" autoplay muted loop playsinline ${hero.poster ? `poster="${escapeHtml(hero.poster)}"` : ''}></video>`
+          : `<img src="${escapeHtml(hero.url)}" alt="${escapeHtml(hero.caption || cs.client || '')}" />`)
+      : `<div class="cv-phone-empty" id="phoneEmpty">Add a video or image to feature</div>`;
+
+    // Gallery strip — every media item, with edit controls. First item is annotated as "Hero".
+    const galleryItemsHTML = media.map((m, i) => {
+      const thumb = m.type === 'video'
+        ? `<video src="${escapeHtml(m.url)}" muted playsinline preload="metadata"${m.poster ? ` poster="${escapeHtml(m.poster)}"` : ''}></video>`
+        : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.caption || '')}" />`;
+      return `
+        <div class="cv-media-item${i === 0 ? ' is-hero' : ''}" data-media-index="${i}" data-media-id="${escapeHtml(m.id || '')}">
+          <div class="cv-media-thumb">
+            ${thumb}
+            <span class="cv-media-badge">${m.type === 'video' ? 'Video' : 'Image'}${i === 0 ? ' · Hero' : ''}</span>
+          </div>
+          <input class="cv-media-caption cv-editable-input" data-field="media-caption" data-index="${i}" type="text" placeholder="Caption (optional)" value="${escapeHtml(m.caption || '')}" />
+          <div class="cv-media-controls">
+            <button class="cv-media-btn" data-action="up" data-index="${i}" title="Move up"${i === 0 ? ' disabled' : ''}>&uarr;</button>
+            <button class="cv-media-btn" data-action="down" data-index="${i}" title="Move down"${i === media.length - 1 ? ' disabled' : ''}>&darr;</button>
+            <button class="cv-media-btn cv-media-btn-del" data-action="remove" data-index="${i}" title="Remove">&times;</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const galleryHTML = `
+      <div class="cv-media-gallery" id="mediaGallery">
+        <div class="cv-media-strip">
+          ${galleryItemsHTML || '<div class="cv-media-empty">No media yet — add the first item below.</div>'}
+        </div>
+        <div class="cv-media-add">
+          <button class="cv-add-btn" id="addVideoBtn">+ Add video</button>
+          <button class="cv-add-btn" id="addImageBtn">+ Add image</button>
+          <span class="cv-media-hint">First item is the hero. Up/down to reorder.</span>
+        </div>
+        <input type="file" id="mediaFile" hidden />
+      </div>
+    `;
+
+    // Read-mode thumbnail strip — only renders when there's more than the hero.
+    // Clicking a thumb opens the lightbox.
+    const readStripHTML = media.length > 1 ? `
+      <div class="cv-readmedia-strip" id="readMediaStrip" aria-label="More from this case study">
+        ${media.slice(1).map((m, j) => {
+          const i = j + 1; // original index in cs.media
+          const thumb = m.type === 'video'
+            ? `<video src="${escapeHtml(m.url)}" muted playsinline preload="metadata"${m.poster ? ` poster="${escapeHtml(m.poster)}"` : ''}></video>`
+            : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.caption || '')}" />`;
+          return `
+            <button class="cv-readmedia-thumb" data-media-open-index="${i}" type="button" aria-label="${escapeHtml(m.caption || (m.type === 'video' ? 'View video' : 'View image'))}">
+              ${thumb}
+              ${m.type === 'video' ? '<span class="cv-readmedia-play" aria-hidden="true">&#9658;</span>' : ''}
+              ${m.caption ? `<span class="cv-readmedia-caption">${escapeHtml(m.caption)}</span>` : ''}
+            </button>
+          `;
+        }).join('')}
+      </div>
+    ` : '';
+
+    // Scale signals — three small inline-editable fields. Always rendered in
+    // edit mode so the user can fill them in; read-mode shows only populated
+    // fields (handled in cv-edit-mode CSS + the placeholder rendering below).
+    const sc = cs.scale || { teamSize: '', geo: '', duration: '' };
+    const scaleHTML = `
+      <section class="cv-scale-section">
+        <div class="cv-section-label">At a glance</div>
+        <div class="cv-scale-grid">
+          <div class="cv-scale-field">
+            <label>Team size</label>
+            <div class="cv-editable" data-field="scale.teamSize" contenteditable="false" data-placeholder="e.g. 250 producers">${escapeHtml(sc.teamSize || '')}</div>
+          </div>
+          <div class="cv-scale-field">
+            <label>Geo reach</label>
+            <div class="cv-editable" data-field="scale.geo" contenteditable="false" data-placeholder="e.g. 70 cities · global">${escapeHtml(sc.geo || '')}</div>
+          </div>
+          <div class="cv-scale-field">
+            <label>Duration</label>
+            <div class="cv-editable" data-field="scale.duration" contenteditable="false" data-placeholder="e.g. 4 weeks">${escapeHtml(sc.duration || '')}</div>
+          </div>
+        </div>
+      </section>
+    `;
 
     // Headline + suffix are no longer overlaid on the video.
     // They now live in the right-hand column (edit-only block) and
@@ -128,18 +210,18 @@
       </div>
 
       <div class="cv-detail-body">
-        <div class="cv-phone" style="position:relative">
-          <div class="cv-phone-frame" id="phoneFrame">
-            ${phoneInner}
+        <div class="cv-phone-column">
+          <div class="cv-phone" style="position:relative">
+            <div class="cv-phone-frame" id="phoneFrame">
+              ${phoneInner}
+            </div>
           </div>
-          <div class="cv-video-controls">
-            <button id="uploadVideoBtn">Upload reel</button>
-            ${cs.video ? '<button id="removeVideoBtn">Remove</button>' : ''}
-          </div>
-          <input type="file" id="videoFile" accept="video/*" hidden />
+          ${readStripHTML}
+          ${galleryHTML}
         </div>
         <div class="cv-detail-right">
           ${cardHighlightHTML}
+          ${scaleHTML}
           ${metricsHTML}
           ${quoteHTML}
         </div>
@@ -149,6 +231,104 @@
     document.title = `Cover — ${cs.client || 'Case Study'}`;
 
     wireEditing();
+    wireReadStrip();
+  }
+
+  // ---------- read-mode media lightbox ----------
+  let _lightboxEl = null;
+  function ensureLightbox() {
+    if (_lightboxEl) return _lightboxEl;
+    const el = document.createElement('div');
+    el.className = 'cv-lightbox';
+    el.hidden = true;
+    el.innerHTML = `
+      <button class="cv-lightbox-close" type="button" aria-label="Close">&times;</button>
+      <button class="cv-lightbox-nav cv-lightbox-prev" type="button" aria-label="Previous">&#10094;</button>
+      <button class="cv-lightbox-nav cv-lightbox-next" type="button" aria-label="Next">&#10095;</button>
+      <div class="cv-lightbox-stage"></div>
+      <div class="cv-lightbox-caption" aria-live="polite"></div>
+    `;
+    document.body.appendChild(el);
+
+    const close = () => closeLightbox();
+    el.querySelector('.cv-lightbox-close').addEventListener('click', close);
+    el.addEventListener('click', (e) => { if (e.target === el) close(); });
+    el.querySelector('.cv-lightbox-prev').addEventListener('click', () => stepLightbox(-1));
+    el.querySelector('.cv-lightbox-next').addEventListener('click', () => stepLightbox(1));
+
+    document.addEventListener('keydown', (e) => {
+      if (el.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') stepLightbox(-1);
+      else if (e.key === 'ArrowRight') stepLightbox(1);
+    });
+
+    _lightboxEl = el;
+    return el;
+  }
+
+  let _lightboxIndex = -1;
+  function openLightbox(index) {
+    const media = Array.isArray(cs?.media) ? cs.media : [];
+    if (!media[index]) return;
+    _lightboxIndex = index;
+    const el = ensureLightbox();
+    renderLightbox();
+    el.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    if (!_lightboxEl) return;
+    _lightboxEl.hidden = true;
+    // Pause any video so it doesn't keep playing in the background
+    const v = _lightboxEl.querySelector('video');
+    if (v) { try { v.pause(); } catch {} }
+    document.body.style.overflow = '';
+    _lightboxIndex = -1;
+  }
+  function stepLightbox(dir) {
+    const media = Array.isArray(cs?.media) ? cs.media : [];
+    if (!media.length) return;
+    const next = (_lightboxIndex + dir + media.length) % media.length;
+    _lightboxIndex = next;
+    renderLightbox();
+  }
+  function renderLightbox() {
+    const media = Array.isArray(cs?.media) ? cs.media : [];
+    const m = media[_lightboxIndex];
+    if (!m || !_lightboxEl) return;
+    const stage = _lightboxEl.querySelector('.cv-lightbox-stage');
+    const cap = _lightboxEl.querySelector('.cv-lightbox-caption');
+    stage.innerHTML = m.type === 'video'
+      ? `<video src="${escapeHtml(m.url)}" controls autoplay playsinline ${m.poster ? `poster="${escapeHtml(m.poster)}"` : ''}></video>`
+      : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.caption || '')}" />`;
+    cap.textContent = m.caption || '';
+    cap.style.display = m.caption ? 'block' : 'none';
+    // Hide prev/next when there's only one item
+    const single = media.length <= 1;
+    _lightboxEl.querySelector('.cv-lightbox-prev').style.display = single ? 'none' : '';
+    _lightboxEl.querySelector('.cv-lightbox-next').style.display = single ? 'none' : '';
+  }
+
+  function wireReadStrip() {
+    document.querySelectorAll('[data-media-open-index]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.mediaOpenIndex);
+        if (Number.isFinite(idx)) openLightbox(idx);
+      });
+    });
+    // Also allow clicking the hero (phone frame) to open the lightbox at index 0
+    // in read mode — quick way to enlarge / show controls on a video.
+    const phone = document.getElementById('phoneFrame');
+    if (phone && Array.isArray(cs.media) && cs.media[0]) {
+      phone.style.cursor = 'zoom-in';
+      phone.addEventListener('click', (e) => {
+        if (document.body.classList.contains('cv-edit-mode')) return; // edit mode = no lightbox
+        // Don't hijack if user clicked an interactive control inside the frame
+        if (e.target.closest('button, input, a')) return;
+        openLightbox(0);
+      });
+    }
   }
 
   // ---------- editing ----------
@@ -183,6 +363,26 @@
     const qb = get('[data-field="quote.body"]');
     const qa = get('[data-field="quote.attribution"]');
     cs.quote = (qb || qa) ? { body: qb, attribution: qa } : null;
+
+    // Scale signals
+    cs.scale = {
+      teamSize: get('[data-field="scale.teamSize"]'),
+      geo: get('[data-field="scale.geo"]'),
+      duration: get('[data-field="scale.duration"]')
+    };
+
+    // Media captions — order/structure is driven by direct cs.media mutations
+    // in the add/move/remove handlers below; here we only sync caption text.
+    if (Array.isArray(cs.media)) {
+      document.querySelectorAll('[data-field="media-caption"]').forEach((input) => {
+        const idx = Number(input.dataset.index);
+        if (Number.isFinite(idx) && cs.media[idx]) {
+          cs.media[idx].caption = (input.value || '').trim();
+        }
+      });
+      // Re-stamp order indices so the server doesn't have to guess.
+      cs.media.forEach((m, i) => { m.order = i; });
+    }
   }
 
   function wireEditing() {
@@ -304,23 +504,69 @@
     });
     document.getElementById('deleteCaseStudyBtn')?.addEventListener('click', deleteCaseStudy);
 
-    // Video upload
-    const upBtn = document.getElementById('uploadVideoBtn');
-    const remBtn = document.getElementById('removeVideoBtn');
-    const fileInput = document.getElementById('videoFile');
-    upBtn?.addEventListener('click', () => fileInput.click());
-    fileInput?.addEventListener('change', uploadVideo);
-    remBtn?.addEventListener('click', () => {
-      if (!confirm('Remove the current reel?')) return;
-      cs.video = null;
-      setDirty(true);
-      render();
-      setEditableMode(true);
+    // Media gallery
+    const fileInput = document.getElementById('mediaFile');
+    let pendingType = 'video';
+    document.getElementById('addVideoBtn')?.addEventListener('click', () => {
+      pendingType = 'video';
+      fileInput.accept = 'video/*';
+      fileInput.click();
+    });
+    document.getElementById('addImageBtn')?.addEventListener('click', () => {
+      pendingType = 'image';
+      fileInput.accept = 'image/*';
+      fileInput.click();
+    });
+    fileInput?.addEventListener('change', (e) => uploadMedia(e, pendingType));
+
+    // Caption inputs — capture on input, mark dirty
+    document.querySelectorAll('[data-field="media-caption"]').forEach((input) => {
+      input.addEventListener('input', () => { captureFromDOM(); setDirty(true); });
+    });
+
+    // Up / down / remove on each media item
+    document.querySelectorAll('.cv-media-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        const action = btn.dataset.action;
+        const idx = Number(btn.dataset.index);
+        if (!Number.isFinite(idx) || !Array.isArray(cs.media)) return;
+        if (action === 'up' && idx > 0) {
+          captureFromDOM();
+          [cs.media[idx - 1], cs.media[idx]] = [cs.media[idx], cs.media[idx - 1]];
+          setDirty(true);
+          render();
+          setEditableMode(editMode);
+        } else if (action === 'down' && idx < cs.media.length - 1) {
+          captureFromDOM();
+          [cs.media[idx + 1], cs.media[idx]] = [cs.media[idx], cs.media[idx + 1]];
+          setDirty(true);
+          render();
+          setEditableMode(editMode);
+        } else if (action === 'remove') {
+          if (!confirm('Remove this media item? The file will be cleaned up if nothing else uses it.')) return;
+          captureFromDOM();
+          const removed = cs.media.splice(idx, 1)[0];
+          setDirty(true);
+          render();
+          setEditableMode(editMode);
+          // Best-effort: ask server to delete the underlying file. The server
+          // refuses (409) if anything else still references the URL, which we
+          // silently ignore — the UI removal already succeeded.
+          if (removed?.url?.startsWith('/media/')) {
+            const filename = removed.url.replace(/^\/media\//, '');
+            fetch(`/api/media/${encodeURIComponent(filename)}`, { method: 'DELETE' })
+              .catch(() => {/* network errors are OK — orphan cleanup is best-effort */});
+          }
+        }
+      });
     });
   }
 
-  async function uploadVideo(e) {
+  async function uploadMedia(e, type) {
     const file = e.target.files?.[0];
+    // Reset the input so re-uploading the same file works
+    e.target.value = '';
     if (!file) return;
     let status = document.getElementById('editStatus');
     if (status) status.textContent = `Uploading ${file.name}…`;
@@ -331,14 +577,21 @@
       if (!upRes.ok) throw new Error('upload_failed');
       const upData = await upRes.json();
 
-      // Preserve any in-flight text edits before persisting the new video URL.
+      // Preserve any in-flight text edits before adding the new item.
       captureFromDOM();
-      cs.video = upData.url;
+      if (!Array.isArray(cs.media)) cs.media = [];
+      const newId = 'm_' + Math.random().toString(36).slice(2, 12);
+      cs.media.push({
+        id: newId,
+        type: type === 'image' ? 'image' : 'video',
+        url: upData.url,
+        poster: null,
+        caption: '',
+        order: cs.media.length
+      });
 
       // Auto-save so the upload sticks even if the user leaves without
-      // hitting Save. (Previously the upload only updated cs client-side and
-      // the subsequent render() reset the dirty/save UI to "All changes saved",
-      // which misled people into thinking it had persisted.)
+      // hitting Save (mirrors the previous behavior).
       const saveRes = await fetch(`/api/case-studies/${encodeURIComponent(cs.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -351,10 +604,10 @@
       setEditableMode(editMode);
       setDirty(false);
       status = document.getElementById('editStatus');
-      if (status) status.textContent = 'Reel saved';
+      if (status) status.textContent = `${type === 'video' ? 'Video' : 'Image'} added`;
     } catch (err) {
       console.error(err);
-      alert('Could not save the uploaded reel. Try again — the file uploaded but the case study didn’t pick it up.');
+      alert(`Could not add the ${type}. The file may have uploaded but the case study didn't pick it up.`);
       const s = document.getElementById('editStatus');
       if (s) s.textContent = 'Upload failed.';
     }

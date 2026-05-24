@@ -74,8 +74,12 @@
     if (activeIndustry !== 'all' && !(cs.industries || []).includes(activeIndustry)) return false;
     if (!query) return true;
     const q = query.toLowerCase();
-    const hay = [cs.client, cs.scope, cs.tier, cs.headline, cs.headlineSuffix, ...(cs.industries || []), ...(cs.tags || []), ...(cs.metrics || [])]
-      .filter(Boolean).join(' ').toLowerCase();
+    const sc = cs.scale || {};
+    const hay = [
+      cs.client, cs.scope, cs.tier, cs.headline, cs.headlineSuffix,
+      sc.teamSize, sc.geo, sc.duration,
+      ...(cs.industries || []), ...(cs.tags || []), ...(cs.metrics || [])
+    ].filter(Boolean).join(' ').toLowerCase();
     return hay.includes(q);
   }
 
@@ -88,6 +92,19 @@
     const headlineHTML = cs.headline
       ? `<mark>${escapeHtml(cs.headline)}</mark>${cs.headlineSuffix ? `<br/><span style="font-weight:600;font-size:0.6em;color:var(--cream-soft)">${escapeHtml(cs.headlineSuffix)}</span>` : ''}`
       : escapeHtml(cs.client || '');
+
+    // Compressed scale line — only shows fields with values, omits row entirely if all empty
+    const sc = cs.scale || {};
+    const scaleBits = [sc.teamSize, sc.geo, sc.duration].map((s) => (s || '').trim()).filter(Boolean);
+    const scaleLineHTML = scaleBits.length
+      ? `<div class="cs-card-scale">${scaleBits.map(escapeHtml).join(' <span class="cs-card-scale-sep">·</span> ')}</div>`
+      : '';
+
+    // Media badge — small indicator that there are multiple media items
+    const mediaCount = Array.isArray(cs.media) ? cs.media.length : 0;
+    const mediaBadgeHTML = mediaCount > 1
+      ? `<span class="cs-card-media-badge" title="${mediaCount} media items">${mediaCount} media</span>`
+      : '';
 
     const isSelected = selected.has(cs.id);
     const isFocused = focusedCardId === cs.id;
@@ -104,10 +121,12 @@
         <a class="cs-card-link" href="/view?id=${encodeURIComponent(cs.id)}">
           <div class="cs-card-preview">
             <div class="cs-card-preview-headline">${headlineHTML}</div>
+            ${mediaBadgeHTML}
           </div>
           <div class="cs-card-info">
             <div class="cs-card-tier">${escapeHtml((cs.industries || []).slice(0, 3).join(' · ') || cs.tier || '')}</div>
             <div class="cs-card-title">${escapeHtml(cs.client || '')} <span class="cs-scope">| ${escapeHtml(cs.scope || '')}</span></div>
+            ${scaleLineHTML}
             <div class="cs-card-tags">${tagHTML}</div>
           </div>
         </a>

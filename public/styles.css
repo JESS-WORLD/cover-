@@ -432,6 +432,38 @@ a { color: inherit; text-decoration: none; }
   font-weight: 700;
 }
 
+.cs-card-scale {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--cream-soft);
+  display: flex; flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: baseline;
+  line-height: 1.35;
+}
+.cs-card-scale-sep {
+  color: var(--text-dim);
+  font-weight: 400;
+  margin: 0 0.05rem;
+}
+
+.cs-card-media-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  color: var(--cream);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(245,236,217,0.18);
+  z-index: 3;
+  pointer-events: none;
+}
+
 .cs-card-tags {
   display: flex;
   flex-wrap: wrap;
@@ -1256,6 +1288,281 @@ body.cv-edit-mode .cv-video-controls { display: flex; }
 .cv-video-controls button:hover { background: rgba(0,0,0,0.9); border-color: var(--cream); }
 
 /* ==========================================================
+   MEDIA GALLERY (edit mode)
+   Shown below the phone-frame hero. First item is the hero.
+========================================================== */
+.cv-phone-column { display: flex; flex-direction: column; gap: 1rem; }
+
+.cv-media-gallery { display: none; flex-direction: column; gap: 0.85rem; }
+body.cv-edit-mode .cv-media-gallery { display: flex; }
+
+.cv-media-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+}
+
+.cv-media-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  padding: 1rem;
+  border: 1px dashed rgba(245,236,217,0.18);
+  border-radius: 10px;
+}
+
+.cv-media-item {
+  display: flex; flex-direction: column; gap: 0.35rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(245,236,217,0.1);
+  border-radius: 10px;
+  padding: 0.45rem;
+}
+.cv-media-item.is-hero {
+  border-color: rgba(245,236,217,0.32);
+  background: rgba(245,236,217,0.04);
+}
+
+.cv-media-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0d0d0d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cv-media-thumb video,
+.cv-media-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cv-media-badge {
+  position: absolute; top: 4px; left: 4px;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
+  color: var(--cream);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+}
+
+.cv-media-caption {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--cream);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+}
+.cv-media-caption:focus {
+  outline: none;
+  border-color: rgba(245,236,217,0.3);
+  background: rgba(0,0,0,0.35);
+}
+.cv-media-caption::placeholder { color: var(--text-dim); font-style: italic; }
+
+.cv-media-controls {
+  display: flex; gap: 0.25rem; justify-content: flex-end;
+}
+.cv-media-btn {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(245,236,217,0.15);
+  color: var(--cream-soft);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  width: 26px; height: 26px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.cv-media-btn:hover:not(:disabled) {
+  background: rgba(245,236,217,0.1);
+  border-color: rgba(245,236,217,0.35);
+  color: var(--cream);
+}
+.cv-media-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.cv-media-btn-del:hover:not(:disabled) {
+  background: rgba(255,115,115,0.15);
+  border-color: rgba(255,115,115,0.4);
+  color: #ff9999;
+}
+
+.cv-media-add {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+}
+.cv-media-hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* ==========================================================
+   READ-MODE MEDIA STRIP (visible to viewers, not editors)
+   Shows secondary media as clickable thumbnails below the hero.
+========================================================== */
+.cv-readmedia-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+}
+body.cv-edit-mode .cv-readmedia-strip { display: none; }
+
+.cv-readmedia-thumb {
+  position: relative;
+  background: transparent;
+  border: 1px solid rgba(245,236,217,0.08);
+  border-radius: 8px;
+  padding: 0;
+  cursor: zoom-in;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+.cv-readmedia-thumb:hover {
+  border-color: rgba(245,236,217,0.4);
+  transform: translateY(-1px);
+}
+.cv-readmedia-thumb video,
+.cv-readmedia-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cv-readmedia-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  color: var(--cream);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.65);
+  pointer-events: none;
+}
+.cv-readmedia-caption {
+  position: absolute; left: 4px; right: 4px; bottom: 4px;
+  background: rgba(0,0,0,0.62);
+  backdrop-filter: blur(4px);
+  color: var(--cream);
+  font-size: 0.66rem;
+  padding: 0.18rem 0.4rem;
+  border-radius: 3px;
+  text-align: left;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* ==========================================================
+   LIGHTBOX (read-mode media enlarged)
+========================================================== */
+.cv-lightbox {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 4rem;
+}
+.cv-lightbox[hidden] { display: none; }
+
+.cv-lightbox-stage {
+  max-width: min(1100px, 92vw);
+  max-height: 82vh;
+  display: flex; align-items: center; justify-content: center;
+}
+.cv-lightbox-stage video,
+.cv-lightbox-stage img {
+  max-width: 100%;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #000;
+}
+
+.cv-lightbox-caption {
+  position: fixed; bottom: 2rem; left: 50%;
+  transform: translateX(-50%);
+  color: var(--cream);
+  font-size: 0.85rem;
+  font-weight: 500;
+  max-width: 80vw;
+  text-align: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+}
+
+.cv-lightbox-close,
+.cv-lightbox-nav {
+  position: fixed;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(245,236,217,0.18);
+  color: var(--cream);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-family: var(--font);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.cv-lightbox-close { top: 1rem; right: 1rem; }
+.cv-lightbox-prev  { left: 1rem; top: 50%; transform: translateY(-50%); }
+.cv-lightbox-next  { right: 1rem; top: 50%; transform: translateY(-50%); }
+.cv-lightbox-close:hover,
+.cv-lightbox-nav:hover {
+  background: rgba(245,236,217,0.16);
+  border-color: var(--cream);
+}
+
+/* ==========================================================
+   SCALE SIGNALS (At a glance)
+   Three small inline-editable fields on the case study view.
+========================================================== */
+.cv-scale-section { /* container */ }
+.cv-scale-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+@media (max-width: 720px) {
+  .cv-scale-grid { grid-template-columns: 1fr; }
+}
+.cv-scale-field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.cv-scale-field label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+.cv-scale-field .cv-editable {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cream);
+  min-height: 1.4em;
+}
+.cv-scale-field .cv-editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-dim);
+  font-style: italic;
+  font-weight: 500;
+}
+/* Hide empty scale fields in read mode so the section doesn't show ghost labels */
+body:not(.cv-edit-mode) .cv-scale-field:has(.cv-editable:empty) { display: none; }
+/* If every field is empty in read mode, hide the whole section */
+body:not(.cv-edit-mode) .cv-scale-section:not(:has(.cv-scale-field:not(:has(.cv-editable:empty)))) {
+  display: none;
+}
+
+/* ==========================================================
    EXPORT VIEW
 ========================================================== */
 .cv-export-toolbar {
@@ -1298,6 +1605,92 @@ body.cv-edit-mode .cv-video-controls { display: flex; }
   break-after: page;
 }
 .cv-export-slide:last-child { border-bottom: none; }
+
+/* Scale signals row on the case study export slide. Sits just below the
+   capability tags / above the body grid. Renders only when populated. */
+.cv-export-scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin: 1rem 0 1.5rem 0;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.cv-export-scale-item {
+  display: flex; flex-direction: column; gap: 0.18rem;
+}
+.cv-export-scale-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+.cv-export-scale-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+/* Secondary-media gallery slide (one per case study, only when 2+ media). */
+.cv-export-gallery {
+  padding: 3rem;
+}
+.cv-export-gallery-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  color: var(--cream);
+  margin: 0.25rem 0 1.5rem 0;
+}
+.cv-export-gallery-title .pipe { color: var(--cream-dim); margin: 0 0.35em; font-weight: 700; }
+.cv-export-gallery-sub {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--cream-soft);
+  font-size: 0.65em;
+}
+.cv-export-grid {
+  display: grid;
+  gap: 1rem;
+}
+.cv-export-grid[data-count="1"] { grid-template-columns: 1fr; }
+.cv-export-grid[data-count="2"] { grid-template-columns: 1fr 1fr; }
+.cv-export-grid[data-count="3"],
+.cv-export-grid[data-count="4"] { grid-template-columns: 1fr 1fr; }
+.cv-export-grid[data-count="5"],
+.cv-export-grid[data-count="6"] { grid-template-columns: 1fr 1fr 1fr; }
+.cv-export-gtile {
+  margin: 0;
+  display: flex; flex-direction: column; gap: 0.45rem;
+}
+.cv-export-gtile-frame {
+  aspect-ratio: 16/9;
+  background: #0d0d0d;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.cv-export-gtile-frame video,
+.cv-export-gtile-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cv-export-gtile figcaption {
+  font-size: 0.78rem;
+  color: var(--cream-soft);
+  font-weight: 500;
+  text-align: center;
+}
+.cv-export-gallery-more {
+  margin-top: 1.2rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-style: italic;
+  text-align: center;
+}
 
 /* About-page slides embedded in the export deck: full-bleed,
    full-height versions of the live .cv-bg-section. */

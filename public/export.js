@@ -217,14 +217,32 @@
   function slideHTML(cs) {
     const tags = (cs.tags || []).map((t) => `<span class="cs-tag">${escapeHtml(t)}</span>`).join('');
 
-    const phoneInner = cs.video
-      ? `<video src="${escapeHtml(cs.video)}" autoplay muted loop playsinline ${cs.poster ? `poster="${escapeHtml(cs.poster)}"` : ''}></video>`
-      : cs.poster
-      ? `<img src="${escapeHtml(cs.poster)}" alt="${escapeHtml(cs.client || '')}" />`
+    // Hero = first media item (server projects legacy video/poster into media on read).
+    const media = Array.isArray(cs.media) ? cs.media : [];
+    const hero = media[0];
+    const phoneInner = hero
+      ? (hero.type === 'video'
+          ? `<video src="${escapeHtml(hero.url)}" autoplay muted loop playsinline ${hero.poster ? `poster="${escapeHtml(hero.poster)}"` : ''}></video>`
+          : `<img src="${escapeHtml(hero.url)}" alt="${escapeHtml(hero.caption || cs.client || '')}" />`)
       : `<div class="cv-phone-empty">No reel uploaded</div>`;
 
-    // Headline overlay removed — the highlighted callout now lives on
-    // dashboard cards only. The export deck shows the clean reel.
+    // Scale signals — small row under the eyebrow tier, only when populated.
+    const sc = cs.scale || {};
+    const scaleBits = [
+      sc.teamSize && { label: 'Team', value: sc.teamSize },
+      sc.geo && { label: 'Reach', value: sc.geo },
+      sc.duration && { label: 'Duration', value: sc.duration }
+    ].filter(Boolean);
+    const scaleHTML = scaleBits.length ? `
+      <div class="cv-export-scale">
+        ${scaleBits.map((b) => `
+          <div class="cv-export-scale-item">
+            <span class="cv-export-scale-label">${escapeHtml(b.label)}</span>
+            <span class="cv-export-scale-value">${escapeHtml(b.value)}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
 
     const metricsHTML = (cs.metrics || []).length ? `
       <section>
@@ -248,6 +266,7 @@
         <div class="cv-detail-tier">${escapeHtml(cs.tier || '')}</div>
         <h1 class="cv-detail-title">${escapeHtml(cs.client || '')}<span class="pipe">|</span>${escapeHtml(cs.scope || '')}</h1>
         ${tags ? `<div class="cv-detail-tags">${tags}</div>` : ''}
+        ${scaleHTML}
         <div class="cv-detail-body">
           <div class="cv-phone">
             <div class="cv-phone-frame">
@@ -259,6 +278,35 @@
             ${quoteHTML}
           </div>
         </div>
+      </section>
+    `;
+  }
+
+  // Secondary media slide — only emitted when a case study has 2+ media items.
+  // Shows up to 6 secondary items in a grid (keeps decks tight even if a study
+  // has 12 photos uploaded; the rest stay viewable in Cover but not in print).
+  function gallerySlideHTML(cs) {
+    const media = Array.isArray(cs.media) ? cs.media : [];
+    if (media.length <= 1) return '';
+    const extras = media.slice(1, 7); // up to 6 secondary items
+    const tiles = extras.map((m) => {
+      const inner = m.type === 'video'
+        ? `<video src="${escapeHtml(m.url)}" muted playsinline preload="metadata"${m.poster ? ` poster="${escapeHtml(m.poster)}"` : ''}></video>`
+        : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.caption || '')}" />`;
+      return `
+        <figure class="cv-export-gtile">
+          <div class="cv-export-gtile-frame">${inner}</div>
+          ${m.caption ? `<figcaption>${escapeHtml(m.caption)}</figcaption>` : ''}
+        </figure>
+      `;
+    }).join('');
+    const moreCount = media.length - 1 - extras.length;
+    return `
+      <section class="cv-export-slide cv-export-gallery">
+        <div class="cv-detail-tier">${escapeHtml(cs.tier || '')} · More from ${escapeHtml(cs.client || '')}</div>
+        <h2 class="cv-export-gallery-title">${escapeHtml(cs.client || '')}<span class="pipe">|</span><span class="cv-export-gallery-sub">selected media</span></h2>
+        <div class="cv-export-grid" data-count="${extras.length}">${tiles}</div>
+        ${moreCount > 0 ? `<div class="cv-export-gallery-more">+ ${moreCount} more in Cover</div>` : ''}
       </section>
     `;
   }
@@ -340,7 +388,10 @@
       </section>
     `;
 
-    deck.innerHTML = cover + aboutDeck + studies.map(slideHTML).join('') + logoSlideHTML(logos);
+    // Each case study contributes its main slide plus (when applicable) a
+    // secondary-media gallery slide.
+    const studySlides = studies.map((cs) => slideHTML(cs) + gallerySlideHTML(cs)).join('');
+    deck.innerHTML = cover + aboutDeck + studySlides + logoSlideHTML(logos);
     document.title = `Cover — ${csLabel}${lgLabel}${aboutLabel}`;
   }
 

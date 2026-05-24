@@ -1,5 +1,5 @@
 import express from 'express';
-import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, stat, unlink } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, basename } from 'node:path';
 import crypto from 'node:crypto';
@@ -160,10 +160,75 @@ app.get('/api/me', (req, res) => {
   res.json({ user: { name: user.name, email: user.email } });
 });
 
+// ---------- Case study schema migration (lazy, read-time) ----------
+// Older records have `video` / `poster` as top-level strings and no `scale`.
+// On every read we project them into the new canonical shape:
+//   media: [{ id, type:'video'|'image', url, poster?, caption?, order }]
+//   scale: { teamSize, geo, duration }
+// The original `video`/`poster` keys are preserved for back-compat — the
+// editor sends the new shape on save and the spread-merge in PUT will
+// effectively retire them over time without a destructive one-shot migration.
+function newMediaId() {
+  return 'm_' + crypto.randomBytes(5).toString('hex');
+}
+function migrateCaseStudy(cs) {
+  if (!cs || typeof cs !== 'object') return cs;
+  const out = { ...cs };
+
+  // media[]
+  const hasMedia = Array.isArray(out.media) && out.media.length > 0;
+  if (!hasMedia) {
+    const built = [];
+    if (out.video) {
+      built.push({
+        id: newMediaId(),
+        type: 'video',
+        url: out.video,
+        poster: out.poster || null,
+        caption: '',
+        order: 0
+      });
+    } else if (out.poster) {
+      // poster without video → treat as a standalone image
+      built.push({
+        id: newMediaId(),
+        type: 'image',
+        url: out.poster,
+        caption: '',
+        order: 0
+      });
+    }
+    out.media = built;
+  } else {
+    // Ensure each media item has the required keys (in case it was hand-edited)
+    out.media = out.media.map((m, i) => ({
+      id: m.id || newMediaId(),
+      type: m.type === 'image' ? 'image' : 'video',
+      url: m.url || '',
+      poster: m.poster || null,
+      caption: m.caption || '',
+      order: typeof m.order === 'number' ? m.order : i
+    })).sort((a, b) => a.order - b.order);
+  }
+
+  // scale
+  const s = out.scale && typeof out.scale === 'object' ? out.scale : {};
+  out.scale = {
+    teamSize: typeof s.teamSize === 'string' ? s.teamSize : '',
+    geo: typeof s.geo === 'string' ? s.geo : '',
+    duration: typeof s.duration === 'string' ? s.duration : ''
+  };
+
+  return out;
+}
+
 // ---------- Case study API ----------
 app.get('/api/case-studies', requireAuth, async (_req, res) => {
   const data = await readData();
-  const list = (data.caseStudies || []).slice().sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+  const list = (data.caseStudies || [])
+    .slice()
+    .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+    .map(migrateCaseStudy);
   res.json({ caseStudies: list });
 });
 
@@ -171,7 +236,7 @@ app.get('/api/case-studies/:id', requireAuth, async (req, res) => {
   const data = await readData();
   const cs = (data.caseStudies || []).find((c) => c.id === req.params.id);
   if (!cs) return res.status(404).json({ error: 'not_found' });
-  res.json(cs);
+  res.json(migrateCaseStudy(cs));
 });
 
 app.put('/api/case-studies/:id', requireAuth, async (req, res) => {
@@ -204,6 +269,8 @@ app.post('/api/case-studies', requireAuth, async (req, res) => {
       headline: '', headlineSuffix: '',
       tags: [], metrics: [],
       quote: null, video: null, poster: null,
+      media: [],
+      scale: { teamSize: '', geo: '', duration: '' },
       draft: true
     };
     data.caseStudies.push(study);
@@ -303,7 +370,7 @@ app.put('/api/intro', requireAuth, async (req, res) => {
 app.post('/api/export', requireAuth, async (req, res) => {
   const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
   const data = await readData();
-  const selected = (data.caseStudies || []).filter((c) => ids.includes(c.id));
+  const selected = (data.caseStudies || []).filter((c) => ids.includes(c.id)).map(migrateCaseStudy);
   res.json({ caseStudies: selected, count: selected.length });
 });
 
@@ -464,6 +531,51 @@ app.post('/api/upload', requireAuth, upload.single('file'), async (req, res) => 
   if (!req.file) return res.status(400).json({ error: 'no_file' });
   const url = `/media/${req.file.filename}`;
   res.json({ ok: true, url, mime: req.file.mimetype, size: req.file.size });
+});
+
+// Ref-counted delete. Scans every place a media URL could appear in the data
+// file (case studies' media[], legacy video/poster, client logos, intro/about
+// video & poster fields, founders, services, sections) and refuses to unlink
+// the file if any reference is found. Conservative on purpose — losing a
+// referenced video is worse than leaving an orphan.
+function collectMediaRefs(data) {
+  const refs = new Set();
+  const add = (v) => { if (typeof v === 'string' && v.startsWith('/media/')) refs.add(v); };
+  const walk = (node) => {
+    if (!node) return;
+    if (typeof node === 'string') { add(node); return; }
+    if (Array.isArray(node)) { node.forEach(walk); return; }
+    if (typeof node === 'object') {
+      for (const k of Object.keys(node)) walk(node[k]);
+    }
+  };
+  walk(data);
+  return refs;
+}
+
+app.delete('/api/media/:filename', requireAuth, async (req, res) => {
+  const filename = req.params.filename;
+  // Defense against path traversal — filenames are fingerprinted and live in
+  // MEDIA_DIR only. Reject anything with a path separator or .. segment.
+  if (!filename || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+    return res.status(400).json({ error: 'bad_filename' });
+  }
+  const fullUrl = `/media/${filename}`;
+  await withDataLock(async () => {
+    const data = await readData();
+    const refs = collectMediaRefs(data);
+    if (refs.has(fullUrl)) {
+      return res.status(409).json({ ok: false, error: 'still_referenced' });
+    }
+    try {
+      await unlink(join(MEDIA_DIR, filename));
+      res.json({ ok: true, deleted: filename });
+    } catch (err) {
+      if (err.code === 'ENOENT') return res.json({ ok: true, deleted: filename, note: 'already_gone' });
+      console.error('[media] delete failed:', err);
+      res.status(500).json({ ok: false, error: 'delete_failed' });
+    }
+  });
 });
 
 // ---------- Backup (Cloudflare R2) ----------
