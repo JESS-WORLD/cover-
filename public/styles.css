@@ -649,6 +649,39 @@ a { color: inherit; text-decoration: none; }
   padding: 1rem;
 }
 
+/* Play indicator overlay — shows on paused hero videos.
+   Chrome aggressively pauses muted-only videos to save power, so we surface
+   a one-click affordance to start playback. Hidden once the video is rolling. */
+.cv-phone-play-indicator {
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.cv-phone-frame.is-paused .cv-phone-play-indicator { opacity: 1; }
+.cv-phone-frame.is-paused::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 4;
+  pointer-events: none;
+  transition: background 180ms ease;
+}
+.cv-phone-play-indicator svg {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 50%;
+  padding: 18px;
+  color: var(--cream);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+}
+/* In edit mode the phone frame is a play toggle, so hint with cursor */
+body.cv-edit-mode .cv-phone-frame.cv-phone-has-video { cursor: pointer; }
+
 /* Right column */
 .cv-detail-right { display: flex; flex-direction: column; gap: 2rem; }
 

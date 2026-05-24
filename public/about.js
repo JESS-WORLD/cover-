@@ -169,7 +169,14 @@
       || sectionEl.querySelector('[data-upload]');
 
     if (video) {
-      mediaEl.innerHTML = `<video src="${escapeHtml(video)}" autoplay muted loop playsinline ${poster ? `poster="${escapeHtml(poster)}"` : ''}></video>`;
+      mediaEl.innerHTML = `<video src="${escapeHtml(video)}" autoplay muted loop playsinline preload="auto" ${poster ? `poster="${escapeHtml(poster)}"` : ''}></video>`;
+      // Chrome may block autoplay on first load even with muted; explicit play() is treated more permissively.
+      const v = mediaEl.querySelector('video');
+      if (v) {
+        const tryPlay = () => v.play().catch(() => {});
+        if (v.readyState >= 2) tryPlay();
+        else v.addEventListener('loadedmetadata', tryPlay, { once: true });
+      }
       sectionEl.dataset.hasMedia = 'true';
       removeBtn.style.display = '';
       uploadBtn.textContent = 'Replace reel';

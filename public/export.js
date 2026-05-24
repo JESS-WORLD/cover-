@@ -52,7 +52,7 @@
   function bgSlide({ key, video, poster, bare = false, contentHTML }) {
     const hasMedia = !!(video || poster);
     const mediaHTML = video
-      ? `<video src="${escapeHtml(video)}" autoplay muted loop playsinline ${poster ? `poster="${escapeHtml(poster)}"` : ''}></video>`
+      ? `<video src="${escapeHtml(video)}" autoplay muted loop playsinline preload="auto" ${poster ? `poster="${escapeHtml(poster)}"` : ''}></video>`
       : poster
       ? `<img src="${escapeHtml(poster)}" alt="" />`
       : '';
@@ -222,7 +222,7 @@
     const hero = media[0];
     const phoneInner = hero
       ? (hero.type === 'video'
-          ? `<video src="${escapeHtml(hero.url)}" autoplay muted loop playsinline ${hero.poster ? `poster="${escapeHtml(hero.poster)}"` : ''}></video>`
+          ? `<video src="${escapeHtml(hero.url)}" autoplay muted loop playsinline preload="auto" ${hero.poster ? `poster="${escapeHtml(hero.poster)}"` : ''}></video>`
           : `<img src="${escapeHtml(hero.url)}" alt="${escapeHtml(hero.caption || cs.client || '')}" />`)
       : `<div class="cv-phone-empty">No reel uploaded</div>`;
 
@@ -393,6 +393,14 @@
     const studySlides = studies.map((cs) => slideHTML(cs) + gallerySlideHTML(cs)).join('');
     deck.innerHTML = cover + aboutDeck + studySlides + logoSlideHTML(logos);
     document.title = `Cover — ${csLabel}${lgLabel}${aboutLabel}`;
+
+    // Chrome may block autoplay on first paint even with `muted` set. Force
+    // explicit play() on every muted-autoplay video — silently swallow rejections.
+    deck.querySelectorAll('video[autoplay][muted]').forEach((v) => {
+      const tryPlay = () => v.play().catch(() => {});
+      if (v.readyState >= 2) tryPlay();
+      else v.addEventListener('loadedmetadata', tryPlay, { once: true });
+    });
   }
 
   printBtn.addEventListener('click', () => window.print());

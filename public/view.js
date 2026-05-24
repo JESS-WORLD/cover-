@@ -53,7 +53,11 @@
     const hero = media[0];
     const phoneInner = hero
       ? (hero.type === 'video'
-          ? `<video src="${escapeHtml(hero.url)}" autoplay muted loop playsinline ${hero.poster ? `poster="${escapeHtml(hero.poster)}"` : ''}></video>`
+          // preload="auto" tells the browser to start fetching immediately
+          // (default "metadata" defers playback start until much later); the
+          // explicit .play() in wirePlayback() below handles the autoplay-policy
+          // case where Chrome silently blocks autoplay attribute on first load.
+          ? `<video src="${escapeHtml(hero.url)}" autoplay muted loop playsinline preload="auto" ${hero.poster ? `poster="${escapeHtml(hero.poster)}"` : ''}></video>`
           : `<img src="${escapeHtml(hero.url)}" alt="${escapeHtml(hero.caption || cs.client || '')}" />`)
       : `<div class="cv-phone-empty" id="phoneEmpty">Add a video or image to feature</div>`;
 
@@ -232,6 +236,52 @@
 
     wireEditing();
     wireReadStrip();
+    wirePhoneVideo();
+  }
+
+  // Chrome 117+ pauses muted-only videos as "video-only background media" to
+  // save power (regardless of autoplay attribute). We can't override that
+  // policy, but we can:
+  //   1. Try to autoplay anyway (works in many cases, e.g. focused tab + visible),
+  //   2. Show a play button overlay when paused so the user can click once,
+  //   3. Click-to-toggle play/pause in edit mode (lightbox still handles read mode).
+  function wirePhoneVideo() {
+    const frame = document.getElementById('phoneFrame');
+    if (!frame) return;
+    const video = frame.querySelector('video');
+    if (!video) {
+      frame.classList.remove('is-paused', 'cv-phone-has-video');
+      return;
+    }
+    frame.classList.add('cv-phone-has-video');
+
+    // Inject the play indicator overlay if it isn't there yet.
+    if (!frame.querySelector('.cv-phone-play-indicator')) {
+      const indicator = document.createElement('div');
+      indicator.className = 'cv-phone-play-indicator';
+      indicator.innerHTML = '<svg viewBox="0 0 24 24" width="56" height="56" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+      frame.appendChild(indicator);
+    }
+
+    const sync = () => frame.classList.toggle('is-paused', video.paused);
+    sync();
+    video.addEventListener('play', sync);
+    video.addEventListener('pause', sync);
+
+    // Try autoplay (often blocked for muted-only videos, but free if it works)
+    const tryPlay = () => video.play().catch(() => {});
+    if (video.readyState >= 1) tryPlay();
+    else video.addEventListener('loadedmetadata', tryPlay, { once: true });
+
+    // Click-to-play in edit mode (read mode falls through to lightbox handler)
+    if (document.body.classList.contains('cv-edit-mode')) {
+      frame.style.cursor = 'pointer';
+      frame.addEventListener('click', (e) => {
+        if (e.target.closest('button, input, a')) return;
+        if (video.paused) video.play().catch(() => {});
+        else video.pause();
+      });
+    }
   }
 
   // ---------- read-mode media lightbox ----------
