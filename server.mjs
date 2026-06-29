@@ -374,6 +374,67 @@ app.post('/api/export', requireAuth, async (req, res) => {
   res.json({ caseStudies: selected, count: selected.length });
 });
 
+// ---------- Client-shareable export tokens ----------
+// Team members create a share token from their selection; clients open the
+// resulting /export?share=TOKEN URL without needing to log in. The token is
+// a signed HMAC payload (stateless, no DB) listing the allowed case-study
+// and logo ids + about flag + 90-day expiry. The /api/shares/:token endpoint
+// returns ONLY the bundled selection — no way for a client to enumerate the
+// rest of the library.
+const SHARE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
+app.post('/api/shares', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.filter((x) => typeof x === 'string')
+    : [];
+  const logoIds = Array.isArray(req.body?.logoIds)
+    ? req.body.logoIds.filter((x) => typeof x === 'string')
+    : [];
+  const includeAbout = !!req.body?.includeAbout;
+  if (!ids.length && !logoIds.length) {
+    return res.status(400).json({ error: 'empty_selection' });
+  }
+  const token = signToken({
+    kind: 'share',
+    ids,
+    logoIds,
+    includeAbout,
+    createdBy: req.user?.email || null,
+    exp: Date.now() + SHARE_TTL_MS
+  });
+  res.json({ token });
+});
+
+// Public — anyone with the token can fetch the bundle. Returns ONLY the
+// case studies / logos / about content named in the token; no other data
+// from the live library is reachable through this endpoint.
+app.get('/api/shares/:token', async (req, res) => {
+  const payload = verifyToken(req.params.token);
+  if (!payload || payload.kind !== 'share') {
+    return res.status(404).json({ error: 'invalid_or_expired' });
+  }
+  const data = await readData();
+  const allowedIds = new Set(payload.ids || []);
+  const caseStudies = (data.caseStudies || [])
+    .filter((c) => allowedIds.has(c.id))
+    .map(migrateCaseStudy);
+  const allowedLogoIds = new Set(payload.logoIds || []);
+  const clients = (data.clients || []).filter((c) => allowedLogoIds.has(c.id));
+  const includeAbout = !!payload.includeAbout;
+  const about = includeAbout
+    ? {
+        intro: data.intro || {},
+        founders: data.founders || [],
+        topCreds: data.topCreds || [],
+        services: {
+          alwaysIncluded: data.alwaysIncluded || [],
+          customServices: data.customServices || []
+        }
+      }
+    : null;
+  res.json({ caseStudies, clients, includeAbout, about });
+});
+
 // ---------- Clients (logo library) ----------
 function slugify(s) {
   return String(s || '')
@@ -636,7 +697,21 @@ function gateHtml(file) {
 app.get('/login', (_req, res) => res.sendFile(join(PUBLIC_DIR, 'login.html')));
 app.get('/view', gateHtml('view.html'));
 app.get('/about', gateHtml('about.html'));
-app.get('/export', gateHtml('export.html'));
+// /export is gated by team login UNLESS a valid share token is present.
+// Clients receive URLs like /export?share=TOKEN and never need to log in.
+app.get('/export', (req, res) => {
+  const shareToken = req.query.share;
+  if (typeof shareToken === 'string' && shareToken) {
+    const payload = verifyToken(shareToken);
+    if (payload && payload.kind === 'share') {
+      return res.sendFile(join(PUBLIC_DIR, 'export.html'));
+    }
+    // Invalid/expired share token — fall through to gateHtml which will
+    // redirect to /login. The page itself can render its own "expired" message
+    // for clients but only if it gets served at all; better to be explicit.
+  }
+  return gateHtml('export.html')(req, res);
+});
 app.get('/logos', gateHtml('logos.html'));
 app.get('/logo-page', gateHtml('logo-page.html'));
 app.get('/sections', gateHtml('sections.html'));

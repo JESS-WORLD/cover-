@@ -318,7 +318,88 @@
     `;
   }
 
+  // Shared render — given the assembled selection, build the deck HTML and
+  // wire post-render details (autoplay coercion, title). Used by both the
+  // internal team path (auth API) and the client share path (public token).
+  function renderDeck({ studies, logos, includeAbout, intro, founders, topCreds, services }) {
+    const csLabel = `${studies.length} case stud${studies.length === 1 ? 'y' : 'ies'}`;
+    const lgLabel = logos.length ? ` · ${logos.length} logo${logos.length === 1 ? '' : 's'}` : '';
+    const aboutLabel = includeAbout ? ' · About' : '';
+    titleEl.textContent = `${csLabel}${lgLabel}${aboutLabel}`;
+
+    const aboutDeck = (includeAbout)
+      ? aboutSlidesHTML(intro || {}, founders || [], topCreds || [], services || {})
+      : '';
+
+    const cover = includeAbout ? '' : `
+      <section class="cv-export-cover">
+        <h1>Every great story starts with an <em>experience</em>.</h1>
+        <p>A curated selection from CAPE Creative.</p>
+        <div class="cv-export-meta">${csLabel}${lgLabel}</div>
+      </section>
+    `;
+
+    const studySlides = studies.map((cs) => slideHTML(cs) + gallerySlideHTML(cs)).join('');
+    deck.innerHTML = cover + aboutDeck + studySlides + logoSlideHTML(logos);
+    document.title = `Cover — ${csLabel}${lgLabel}${aboutLabel}`;
+
+    // Chrome may block autoplay on first paint even with `muted` set.
+    deck.querySelectorAll('video[autoplay][muted]').forEach((v) => {
+      const tryPlay = () => v.play().catch(() => {});
+      if (v.readyState >= 2) tryPlay();
+      else v.addEventListener('loadedmetadata', tryPlay, { once: true });
+    });
+  }
+
+  // Client share-link path: hit /api/shares/:token (public) for the whole
+  // bundle. No way to enumerate other case studies — server only returns the
+  // ids signed into the token. Also locks down the UI so the client can't
+  // navigate elsewhere (logo not clickable, Copy share link hidden).
+  async function loadFromShareToken(token) {
+    document.body.classList.add('cv-share-mode');
+    // Disable the logo link so clients can't click through to the dashboard.
+    const logoLink = document.querySelector('.cv-logo');
+    if (logoLink && logoLink.tagName === 'A') {
+      logoLink.removeAttribute('href');
+      logoLink.style.cursor = 'default';
+    }
+    let data;
+    try {
+      const res = await fetch(`/api/shares/${encodeURIComponent(token)}`);
+      if (!res.ok) {
+        deck.innerHTML = `
+          <section class="cv-export-cover">
+            <h1>This share link is no longer available.</h1>
+            <p>It may have expired or been revoked. Reach out to your CAPE contact for a fresh link.</p>
+          </section>
+        `;
+        return;
+      }
+      data = await res.json();
+    } catch (err) {
+      console.error(err);
+      deck.innerHTML = '<section class="cv-export-cover"><h1>Could not load this share.</h1></section>';
+      return;
+    }
+    renderDeck({
+      studies: data.caseStudies || [],
+      logos: data.clients || [],
+      includeAbout: !!data.includeAbout,
+      intro: data.about?.intro,
+      founders: data.about?.founders,
+      topCreds: data.about?.topCreds,
+      services: data.about?.services
+    });
+  }
+
   async function load() {
+    // Check for a client share token first — public path, no auth.
+    const shareToken = new URLSearchParams(window.location.search).get('share');
+    if (shareToken) {
+      return loadFromShareToken(shareToken);
+    }
+
+    // Internal team path: pulls from authenticated endpoints.
     const ids = getIds();
     const logoIds = getLogoIds();
 
@@ -333,7 +414,6 @@
     }
 
     const includeAbout = getIncludeAbout();
-
     const requests = [];
     if (ids.length) {
       requests.push(fetch('/api/export', {
@@ -368,58 +448,46 @@
     const allLogos = logoData.clients || [];
     const logosById = new Map(allLogos.map((c) => [c.id, c]));
     const logos = logoIds.map((id) => logosById.get(id)).filter(Boolean);
-
-    const csLabel = `${studies.length} case stud${studies.length === 1 ? 'y' : 'ies'}`;
-    const lgLabel = logos.length ? ` · ${logos.length} logo${logos.length === 1 ? '' : 's'}` : '';
-    const aboutLabel = includeAbout ? ' · About' : '';
-    titleEl.textContent = `${csLabel}${lgLabel}${aboutLabel}`;
-
-    let aboutDeck = '';
+    let intro, founders, topCreds, services;
     if (includeAbout && aboutPayload) {
       const [foundersData, servicesData, introData] = aboutPayload;
-      aboutDeck = aboutSlidesHTML(
-        introData || {},
-        foundersData?.founders || [],
-        foundersData?.topCreds || [],
-        servicesData || {}
-      );
+      intro = introData;
+      founders = foundersData?.founders || [];
+      topCreds = foundersData?.topCreds || [];
+      services = servicesData || {};
     }
-
-    // The cover-of-the-deck slide is suppressed when About is included —
-    // the hero/showreel slot is the visual opener instead.
-    const cover = includeAbout ? '' : `
-      <section class="cv-export-cover">
-        <h1>Every great story starts with an <em>experience</em>.</h1>
-        <p>A curated selection from CAPE Creative.</p>
-        <div class="cv-export-meta">${csLabel}${lgLabel}</div>
-      </section>
-    `;
-
-    // Each case study contributes its main slide plus (when applicable) a
-    // secondary-media gallery slide.
-    const studySlides = studies.map((cs) => slideHTML(cs) + gallerySlideHTML(cs)).join('');
-    deck.innerHTML = cover + aboutDeck + studySlides + logoSlideHTML(logos);
-    document.title = `Cover — ${csLabel}${lgLabel}${aboutLabel}`;
-
-    // Chrome may block autoplay on first paint even with `muted` set. Force
-    // explicit play() on every muted-autoplay video — silently swallow rejections.
-    deck.querySelectorAll('video[autoplay][muted]').forEach((v) => {
-      const tryPlay = () => v.play().catch(() => {});
-      if (v.readyState >= 2) tryPlay();
-      else v.addEventListener('loadedmetadata', tryPlay, { once: true });
-    });
+    renderDeck({ studies, logos, includeAbout, intro, founders, topCreds, services });
   }
 
   printBtn.addEventListener('click', () => window.print());
 
+  // Generates a stateless share token via /api/shares, then copies the
+  // resulting /export?share=TOKEN URL. Previously just copied the current
+  // URL which had ?ids=... and required login — useless for clients.
   copyBtn.addEventListener('click', async () => {
+    const originalText = copyBtn.textContent;
+    copyBtn.disabled = true;
+    copyBtn.textContent = 'Generating link…';
     try {
-      await navigator.clipboard.writeText(window.location.href);
-      const orig = copyBtn.textContent;
-      copyBtn.textContent = 'Copied!';
-      setTimeout(() => { copyBtn.textContent = orig; }, 1600);
-    } catch {
-      alert('Could not copy. URL: ' + window.location.href);
+      const ids = getIds();
+      const logoIds = getLogoIds();
+      const includeAbout = getIncludeAbout();
+      const res = await fetch('/api/shares', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, logoIds, includeAbout })
+      });
+      if (!res.ok) throw new Error('share_failed');
+      const { token } = await res.json();
+      const url = `${window.location.origin}/export?share=${encodeURIComponent(token)}`;
+      await navigator.clipboard.writeText(url);
+      copyBtn.textContent = '✓ Link copied!';
+      setTimeout(() => { copyBtn.textContent = originalText; copyBtn.disabled = false; }, 2000);
+    } catch (err) {
+      console.error(err);
+      copyBtn.textContent = 'Failed — try again';
+      copyBtn.disabled = false;
+      setTimeout(() => { copyBtn.textContent = originalText; }, 2400);
     }
   });
 

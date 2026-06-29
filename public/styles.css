@@ -67,10 +67,18 @@ a { color: inherit; text-decoration: none; }
 .cv-header-left { display: flex; align-items: center; gap: 1.25rem; }
 
 .cv-logo {
+  display: inline-flex;
+  align-items: center;
+  /* Text styles kept as a fallback if the image fails to load */
   font-weight: 900;
   font-size: 1.05rem;
   letter-spacing: 0.18em;
   color: var(--cream);
+}
+.cv-logo img {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 
 .cv-tagline {
@@ -1698,6 +1706,13 @@ body:not(.cv-edit-mode) .cv-scale-field:has(.cv-editable:empty) { display: none;
 body:not(.cv-edit-mode) .cv-scale-section:not(:has(.cv-scale-field:not(:has(.cv-editable:empty)))) {
   display: none;
 }
+
+/* ==========================================================
+   CLIENT SHARE MODE (export deck via signed share token)
+   Strips the team-only chrome so clients can't navigate elsewhere.
+========================================================== */
+body.cv-share-mode .cv-logo { cursor: default; pointer-events: none; }
+body.cv-share-mode #copyLinkBtn { display: none; }
 
 /* ==========================================================
    PRESENTER MODE (export deck)
