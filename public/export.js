@@ -231,7 +231,7 @@
     const sc = cs.scale || {};
     const scaleBits = [
       sc.teamSize && { label: 'Team', value: sc.teamSize },
-      sc.geo && { label: 'Reach', value: sc.geo },
+      sc.geo && { label: 'Base location', value: sc.geo },
       sc.duration && { label: 'Duration', value: sc.duration }
     ].filter(Boolean);
     const scaleHTML = scaleBits.length ? `

@@ -153,8 +153,8 @@
             <div class="cv-editable" data-field="scale.teamSize" contenteditable="false" data-placeholder="e.g. 250 producers">${escapeHtml(sc.teamSize || '')}</div>
           </div>
           <div class="cv-scale-field">
-            <label>Geo reach</label>
-            <div class="cv-editable" data-field="scale.geo" contenteditable="false" data-placeholder="e.g. 70 cities · global">${escapeHtml(sc.geo || '')}</div>
+            <label>Base location</label>
+            <div class="cv-editable" data-field="scale.geo" contenteditable="false" data-placeholder="e.g. New York · Global HQ">${escapeHtml(sc.geo || '')}</div>
           </div>
           <div class="cv-scale-field">
             <label>Duration</label>
@@ -482,8 +482,11 @@
 
   function wireEditing() {
     document.querySelectorAll('.cv-editable').forEach((el) => {
-      el.addEventListener('input', () => { captureFromDOM(); setDirty(true); });
-      el.addEventListener('blur', () => captureFromDOM());
+      // Type, pause briefly → auto-save fires. Click out of a field → also
+      // triggers auto-save. The 600ms debounce inside autoSaveIfDirty()
+      // coalesces rapid edits and tab-through into a single network call.
+      el.addEventListener('input', () => { captureFromDOM(); setDirty(true); autoSaveIfDirty(); });
+      el.addEventListener('blur', () => { captureFromDOM(); autoSaveIfDirty(); });
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && el.dataset.field !== 'metric' && el.dataset.field !== 'quote.body') {
           e.preventDefault();
@@ -521,7 +524,7 @@
         captureFromDOM();
         setDirty(true);
       });
-      span.querySelector('.cv-editable').addEventListener('input', () => { captureFromDOM(); setDirty(true); });
+      span.querySelector('.cv-editable').addEventListener('input', () => { captureFromDOM(); setDirty(true); autoSaveIfDirty(); });
       captureFromDOM();
       setDirty(true);
     });
@@ -551,7 +554,7 @@
         captureFromDOM();
         setDirty(true);
       });
-      span.querySelector('.cv-editable').addEventListener('input', () => { captureFromDOM(); setDirty(true); });
+      span.querySelector('.cv-editable').addEventListener('input', () => { captureFromDOM(); setDirty(true); autoSaveIfDirty(); });
       captureFromDOM();
       setDirty(true);
     });
@@ -569,7 +572,7 @@
       `;
       list.appendChild(li);
       const ed = li.querySelector('.cv-editable');
-      ed.addEventListener('input', () => { captureFromDOM(); setDirty(true); });
+      ed.addEventListener('input', () => { captureFromDOM(); setDirty(true); autoSaveIfDirty(); });
       li.querySelector('.cv-metric-del').addEventListener('click', () => {
         li.remove(); captureFromDOM(); setDirty(true);
       });
@@ -631,7 +634,7 @@
 
     // Caption inputs — capture on input, mark dirty
     document.querySelectorAll('[data-field="media-caption"]').forEach((input) => {
-      input.addEventListener('input', () => { captureFromDOM(); setDirty(true); });
+      input.addEventListener('input', () => { captureFromDOM(); setDirty(true); autoSaveIfDirty(); });
     });
 
     // Up / down / remove on each media item.
@@ -753,10 +756,25 @@
     }
   }
 
-  async function save() {
+  // Auto-save debounce — fires 600ms after the last blur so tabbing
+  // through fields doesn't pile up requests. Cancelled when an explicit
+  // save() runs (manual click) so we don't double-save.
+  let _autoSaveTimer = null;
+  function autoSaveIfDirty() {
+    clearTimeout(_autoSaveTimer);
+    if (!dirty) return;
+    _autoSaveTimer = setTimeout(() => {
+      _autoSaveTimer = null;
+      save({ silent: true });
+    }, 600);
+  }
+
+  async function save({ silent = false } = {}) {
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = null;
     captureFromDOM();
     const status = document.getElementById('editStatus');
-    if (status) status.textContent = 'Saving…';
+    if (status) status.textContent = silent ? 'Saving…' : 'Saving…';
     try {
       const res = await fetch(`/api/case-studies/${encodeURIComponent(cs.id)}`, {
         method: 'PUT',
@@ -766,11 +784,28 @@
       if (!res.ok) throw new Error('save failed');
       cs = await res.json();
       setDirty(false);
-      if (status) status.textContent = 'Saved';
+      // Green confirmation pulse — uses the same .is-just-saved class as
+      // the auto-save-on-media-upload flow for visual consistency.
+      const s = document.getElementById('editStatus');
+      if (s) {
+        s.textContent = silent ? '✓ Saved' : 'Saved';
+        s.classList.add('is-just-saved');
+        setTimeout(() => {
+          const s2 = document.getElementById('editStatus');
+          if (s2) {
+            s2.classList.remove('is-just-saved');
+            // Only revert to the calm "All changes saved" text if no one
+            // has dirtied the form again in the meantime.
+            if (!dirty) s2.textContent = 'All changes saved';
+          }
+        }, silent ? 1800 : 1200);
+      }
     } catch (err) {
       console.error(err);
       if (status) status.textContent = 'Save failed';
-      alert('Could not save changes.');
+      // Only alert for manual saves. Auto-save failures are quiet — the
+      // status text remains "Save failed" and the user can hit Save to retry.
+      if (!silent) alert('Could not save changes.');
     }
   }
 
