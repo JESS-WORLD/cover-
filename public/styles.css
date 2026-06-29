@@ -1708,6 +1708,24 @@ body:not(.cv-edit-mode) .cv-scale-section:not(:has(.cv-scale-field:not(:has(.cv-
 }
 
 /* ==========================================================
+   EXPORT DECK — between-case-study divider
+========================================================== */
+.cv-export-divider {
+  border: none;
+  height: 1px;
+  margin: 0;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--border-strong) 18%,
+    var(--border-strong) 82%,
+    transparent 100%
+  );
+}
+/* Suppress in presenter mode so scroll-snap stays clean section-to-section. */
+body.cv-presenter-mode .cv-export-divider { display: none; }
+
+/* ==========================================================
    CLIENT SHARE MODE (export deck via signed share token)
    Strips the team-only chrome so clients can't navigate elsewhere.
 ========================================================== */

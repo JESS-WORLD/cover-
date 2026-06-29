@@ -339,7 +339,12 @@
       </section>
     `;
 
-    const studySlides = studies.map((cs) => slideHTML(cs) + gallerySlideHTML(cs)).join('');
+    // Divider sits BETWEEN case studies (not between a study's own main +
+    // gallery slides), and not after the very last study. Hidden in presenter
+    // mode via CSS so scroll-snap stays clean.
+    const studySlides = studies
+      .map((cs) => slideHTML(cs) + gallerySlideHTML(cs))
+      .join('<hr class="cv-export-divider" />');
     deck.innerHTML = cover + aboutDeck + studySlides + logoSlideHTML(logos);
     document.title = `Cover — ${csLabel}${lgLabel}${aboutLabel}`;
 
