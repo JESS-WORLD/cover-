@@ -1713,7 +1713,9 @@ body:not(.cv-edit-mode) .cv-scale-section:not(:has(.cv-scale-field:not(:has(.cv-
 .cv-export-divider {
   border: none;
   height: 1px;
-  margin: 0;
+  /* Breathing room so each case study reads as its own panel — combines
+     with the slide's own 3rem padding for ~11rem of black between cases. */
+  margin: 4rem 0;
   background: linear-gradient(
     to right,
     transparent 0%,
